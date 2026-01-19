@@ -1,0 +1,6 @@
+<view class="urgent-bar">
+  <view class="urgent-icon">🔥</view>
+  <view class="urgent-track">
+    <text class="urgent-text">{{currentText}}</text>
+  </view>
+</view>

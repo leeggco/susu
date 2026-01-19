@@ -1,0 +1,75 @@
+.detail-page {
+  padding-bottom: 160rpx;
+  background: #f7f7f7;
+  min-height: 100vh;
+}
+
+.goods-card-wrapper {
+  padding: 20rpx;
+}
+
+.detail-content {
+  padding: 0 20rpx;
+}
+
+.detail-benefit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  background: #fff;
+  padding: 24rpx;
+  border-radius: 20rpx;
+}
+
+.benefit-item {
+  background: #fff3e0;
+  color: #bf5c00;
+  border-radius: 18rpx;
+  padding: 6rpx 16rpx;
+  font-size: 22rpx;
+}
+
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 120rpx;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx 0 20rpx;
+  box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+.bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.bottom-label {
+  font-size: 22rpx;
+  color: #9a9a9a;
+}
+
+.bottom-price {
+  font-size: 40rpx;
+}
+
+.price-strong {
+  color: #d64a43;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.bottom-button {
+  background: #e02e24;
+  color: #fff;
+  padding: 20rpx 40rpx;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}

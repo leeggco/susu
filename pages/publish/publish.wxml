@@ -1,0 +1,4 @@
+<navigation-bar title="发布" back="{{false}}" color="#fff" background="#E02E24"></navigation-bar>
+<view class="container">
+  <text>发布页面</text>
+</view>

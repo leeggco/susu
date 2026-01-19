@@ -1,0 +1,38 @@
+.urgent-bar {
+  display: flex;
+  align-items: center;
+  background: #fff5f4;
+  border: 1rpx solid #ffd1ce;
+  padding: 12rpx 16rpx;
+  border-radius: 14rpx;
+  margin: 16rpx 20rpx 0;
+  overflow: hidden;
+}
+
+.urgent-icon {
+  margin-right: 10rpx;
+  font-size: 24rpx;
+}
+
+.urgent-track {
+  flex: 1;
+  overflow: hidden;
+}
+
+.urgent-text {
+  display: inline-block;
+  white-space: nowrap;
+  color: #e02e24;
+  font-weight: 600;
+  font-size: 24rpx;
+  animation: marquee 6s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}

@@ -1,0 +1,43 @@
+<view class="goods-card">
+  <view class="card-body">
+    <view class="thumb-wrap">
+      <image class="thumb" src="{{item.image}}" mode="aspectFill"></image>
+      <view class="tag-platform" wx:if="{{item.platform}}">{{item.platform}}</view>
+      <view class="tag-group-size">{{groupSize}}人团</view>
+    </view>
+    <view class="info">
+      <view class="title-row">
+        <text class="title">{{item.title}}</text>
+      </view>
+
+      <view class="sub-row">
+        <text class="sub-remain">还差<text class="sub-remain-num">{{remainCount}}</text>人成团，仅剩：</text>
+        <view class="timer-box">
+          <text class="timer-unit">{{countdown.h}}</text>
+          <text class="timer-sep">:</text>
+          <text class="timer-unit">{{countdown.m}}</text>
+          <text class="timer-sep">:</text>
+          <text class="timer-unit">{{countdown.s}}</text>
+          <text class="timer-sep">.</text>
+          <text class="timer-unit">{{countdown.ms}}</text>
+        </view>
+      </view>
+
+      <view class="price-bar">
+        <view class="price-left">
+          <view class="price-row-top">
+            <text class="price-label">拼团价</text>
+            <text class="price-strong price-main">¥{{item.price}}</text>
+          </view>
+          <view class="price-row-bottom">
+            <text class="price-sub-label">全网低价</text>
+            <text class="price-sub-num">¥{{item.original_price}}</text>
+          </view>
+        </view>
+        <view class="cta-wrapper">
+          <view class="cta-btn">立即参团</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

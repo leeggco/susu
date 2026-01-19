@@ -1,0 +1,76 @@
+page {
+  background: #f7f7f7;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.scroll-area {
+  flex: 1;
+  height: 0; /* Important for flex child to scroll */
+  width: 100%;
+}
+
+.search-bar {
+  margin: 20rpx 20rpx 0;
+  height: 72rpx;
+  background: #fff;
+  border-radius: 36rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 20rpx;
+  gap: 12rpx;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.search-icon {
+  font-size: 26rpx;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333;
+  height: 100%;
+}
+
+.search-placeholder {
+  color: #9a9a9a;
+  font-size: 26rpx;
+}
+
+.search-tag {
+  background: #ffd161;
+  color: #8b3d00;
+  padding: 6rpx 16rpx;
+  border-radius: 24rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.goods-grid {
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx 20rpx 0;
+  gap: 18rpx;
+}
+
+.goods-item {
+  width: 100%;
+}
+
+.list-footer {
+  text-align: center;
+  padding-top: 80rpx;
+  padding-bottom: calc(220rpx + env(safe-area-inset-bottom));
+  color: #9a9a9a;
+  font-size: 24rpx;
+}

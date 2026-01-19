@@ -1,0 +1,27 @@
+<view class="page-container">
+  <navigation-bar title="拼团神器" back="{{false}}" color="#fff" background="#E02E24"></navigation-bar>
+  <scroll-view 
+    class="scroll-area" 
+    scroll-y 
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onRefresherRefresh"
+    bindscrolltolower="onReachBottom"
+    lower-threshold="100"
+  >
+    <view class="search-bar">
+      <view class="search-icon">🔍</view>
+      <input class="search-input" placeholder="搜索拼团好物" placeholder-class="search-placeholder" bindinput="onSearchInput" bindconfirm="onSearchConfirm" confirm-type="search" value="{{searchValue}}" />
+      <view class="search-tag" bindtap="onSearchConfirm">搜索</view>
+    </view>
+    <urgent-bar messages="{{noticeList}}"></urgent-bar>
+    <view class="goods-grid">
+      <block wx:for="{{goodsList}}" wx:key="id">
+        <view class="goods-item" data-id="{{item.id}}" bindtap="handleGoodsTap">
+          <goods-card item="{{item}}"></goods-card>
+        </view>
+      </block>
+    </view>
+    <view class="list-footer">{{loadingText}}</view>
+  </scroll-view>
+</view>

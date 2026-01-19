@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "navigation-bar": "/components/navigation-bar/navigation-bar",
+    "goods-card": "/components/goods-card/goods-card",
+    "urgent-bar": "/components/urgent-bar/urgent-bar"
+  },
+  "enablePullDownRefresh": false,
+  "navigationStyle": "custom"
+}

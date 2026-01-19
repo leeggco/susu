@@ -1,0 +1,305 @@
+.goods-card {
+  background: #fff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 10rpx 26rpx rgba(0, 0, 0, 0.04);
+  padding: 24rpx 24rpx 20rpx;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+.header-avatar {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #e6e6e6;
+  flex-shrink: 0;
+}
+
+.header-name {
+  font-size: 28rpx;
+  color: #555;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240rpx;
+}
+
+.header-time {
+  font-size: 26rpx;
+  color: #aaa;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 4rpx;
+}
+
+.header-share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52rpx;
+  padding: 0 16rpx;
+  border-radius: 12rpx;
+  background: #fff1f0;
+  gap: 6rpx;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.header-share-icon {
+  font-size: 24rpx;
+  color: #e02e24;
+  line-height: 1;
+  transform: rotate(-45deg);
+  margin-top: 2rpx;
+}
+
+.header-share-text {
+  font-size: 26rpx;
+  color: #e02e24;
+  font-weight: 500;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.card-body {
+  display: flex;
+  gap: 20rpx;
+}
+
+.thumb-wrap {
+  position: relative;
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+  background: #f8f8f8;
+  flex-shrink: 0;
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+}
+
+.tag-platform {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: #e02e24;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 4rpx 8rpx;
+  border-bottom-right-radius: 8rpx;
+  z-index: 10;
+}
+
+.tag-group-size {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: #e02e24;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 4rpx 8rpx;
+  border-bottom-left-radius: 8rpx;
+  z-index: 10;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.title-row {
+  display: block;
+  line-height: 1.35;
+  max-height: 80rpx;
+  overflow: hidden;
+}
+
+.title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8rpx;
+}
+
+.sub-row {
+  margin-top: auto;
+  margin-bottom: 12rpx;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sub-remain {
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.sub-remain-num {
+  color: #ff5e4d;
+  font-weight: 700;
+}
+
+.timer-box {
+  display: flex;
+  align-items: center;
+  margin-left: 8rpx;
+}
+
+.timer-unit {
+  background: #ff5e4d;
+  color: #fff;
+  font-size: 22rpx;
+  padding: 0 4rpx;
+  border-radius: 6rpx;
+  min-width: 32rpx;
+  text-align: center;
+  font-weight: 500;
+  line-height: 32rpx;
+  height: 32rpx;
+  font-family: monospace;
+}
+
+.timer-sep {
+  color: #ff5e4d;
+  font-size: 22rpx;
+  margin: 0 2rpx;
+  font-weight: 700;
+}
+
+.price-bar {
+  height: 92rpx;
+  border-radius: 16rpx;
+  background: #fdf5f3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: visible;
+}
+
+.price-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 20rpx;
+  z-index: 2;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.price-row-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.price-row-bottom {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+  margin-top: -4rpx;
+}
+
+.price-sub-label {
+  font-size: 20rpx;
+  color: #999;
+}
+
+.price-sub-num {
+  font-size: 24rpx;
+  color: #999;
+  text-decoration: line-through;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.price-label {
+  font-size: 28rpx;
+  color: #d64a43;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.price-main {
+  font-size: 48rpx;
+  color: #d64a43;
+  font-weight: 700;
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.cta-wrapper {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-right: 20rpx;
+  z-index: 2;
+}
+
+.bolt-shape {
+  display: none;
+}
+
+/* 
+ * 设计稿右下角按钮与背景融合的特殊处理：
+ * 实际上是整个price-bar淡红背景，
+ * 按钮是一个右侧的渐变红块，
+ * 中间用一个斜切的橙色块衔接
+ */
+
+.cta-btn {
+  position: relative;
+  height: 64rpx;
+  padding: 0 20rpx 0 36rpx; /* 减小内边距，使按钮更窄 */
+  border-radius: 8rpx 12rpx 12rpx 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #ff5e4d 0%, #ff3b30 100%);
+  color: #fff;
+  font-size: 28rpx; /* 调小字体 */
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 2rpx 4rpx 10rpx rgba(255, 59, 48, 0.3);
+}
+
+.cta-btn::before {
+  content: "";
+  position: absolute;
+  left: -14rpx;
+  top: 0;
+  bottom: 0;
+  width: 30rpx;
+  background: #ff9f4f; /* 橙色衔接块 */
+  transform: skewX(-20deg);
+  z-index: -1;
+  border-radius: 6rpx 0 0 6rpx;
+}

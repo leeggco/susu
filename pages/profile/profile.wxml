@@ -1,0 +1,4 @@
+<navigation-bar title="我的" back="{{false}}" color="#fff" background="#E02E24"></navigation-bar>
+<view class="container">
+  <text>我的页面</text>
+</view>
