@@ -1,3 +1,7 @@
 {
-  "navigationBarTitleText": "发布"
+  "usingComponents": {
+    "navigation-bar": "/components/navigation-bar/navigation-bar"
+  },
+  "navigationBarTitleText": "发布拼团",
+  "navigationStyle": "custom"
 }

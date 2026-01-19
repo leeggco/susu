@@ -1,6 +1,13 @@
 <view class="urgent-bar">
   <view class="urgent-icon">🔥</view>
-  <view class="urgent-track">
-    <text class="urgent-text">{{currentText}}</text>
-  </view>
+  <swiper class="urgent-swiper" vertical autoplay circular interval="3000" duration="500">
+    <block wx:for="{{messages}}" wx:key="index">
+      <swiper-item class="swiper-item">
+        <view class="urgent-item">
+          <text class="urgent-text">{{item.text}}</text>
+          <text class="urgent-time">{{item.time}}</text>
+        </view>
+      </swiper-item>
+    </block>
+  </swiper>
 </view>

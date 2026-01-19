@@ -50,10 +50,14 @@ page {
 .search-tag {
   background: #ffd161;
   color: #8b3d00;
-  padding: 6rpx 16rpx;
-  border-radius: 24rpx;
-  font-size: 22rpx;
+  padding: 0 32rpx;
+  border-radius: 30rpx;
+  font-size: 26rpx;
   font-weight: 600;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .goods-grid {

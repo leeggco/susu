@@ -1,7 +1,20 @@
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scroll-area {
+  flex: 1;
+  height: 0;
+  width: 100%;
+}
+
 .detail-page {
   padding-bottom: 160rpx;
   background: #f7f7f7;
-  min-height: 100vh;
+  min-height: 100%;
 }
 
 .goods-card-wrapper {
@@ -27,6 +40,38 @@
   border-radius: 18rpx;
   padding: 6rpx 16rpx;
   font-size: 22rpx;
+}
+
+/* Related Section */
+.related-section {
+  margin-top: 40rpx;
+  padding: 0 20rpx;
+}
+
+.divider-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30rpx;
+}
+
+.divider-line {
+  width: 60rpx;
+  height: 2rpx;
+  background: #ddd;
+}
+
+.divider-text {
+  font-size: 28rpx;
+  color: #666;
+  margin: 0 24rpx;
+  font-weight: 500;
+}
+
+.related-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 
 .bottom-bar {

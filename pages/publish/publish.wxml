@@ -1,4 +1,64 @@
-<navigation-bar title="发布" back="{{false}}" color="#fff" background="#E02E24"></navigation-bar>
-<view class="container">
-  <text>发布页面</text>
+<navigation-bar title="发布拼团" back="{{false}}" color="#000" background="#fff"></navigation-bar>
+
+<view class="publish-container">
+  <!-- Tabs -->
+  <view class="tabs-header">
+    <block wx:for="{{tabs}}" wx:key="*this">
+      <view class="tab-item {{activeTab === index ? 'active' : ''}}" bindtap="onTabClick" data-index="{{index}}">
+        <text class="tab-text">{{item}}</text>
+        <view class="tab-line" wx:if="{{activeTab === index}}"></view>
+      </view>
+    </block>
+  </view>
+
+  <!-- Tutorial & Tips -->
+  <view class="tips-section">
+    <view class="tutorial-link">
+      <text>分享教程</text>
+      <view class="help-icon">?</view>
+    </view>
+    <view class="tip-content">
+      先在首页搜索已发布团，如果可以以直接拼，无需再发布，成团速度更快！
+    </view>
+  </view>
+
+  <!-- Upload Area -->
+  <view class="upload-section" bindtap="onUploadImage">
+    <block wx:if="{{uploadedImage}}">
+      <image class="preview-image" src="{{uploadedImage}}" mode="aspectFit"></image>
+      <view class="re-upload-text">点击重新上传</view>
+    </block>
+    <block wx:else>
+      <view class="upload-placeholder">
+        <text class="plus-icon">+</text>
+        <text class="upload-text">上传拼团图片</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- Top Options -->
+  <view class="options-section">
+    <text class="options-label">置顶拼团</text>
+    <view class="options-group">
+      <block wx:for="{{topOptions}}" wx:key="value">
+        <view class="option-item" bindtap="onOptionSelect" data-value="{{item.value}}">
+          <view class="checkbox {{selectedTopOption === item.value ? 'checked' : ''}}">
+            <text wx:if="{{selectedTopOption === item.value}}" class="check-mark">✓</text>
+          </view>
+          <text class="option-text {{selectedTopOption === item.value ? 'active-text' : ''}}">{{item.label}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- Submit Button -->
+  <view class="submit-btn-wrapper">
+    <button class="submit-btn" bindtap="onSubmit">发布拼团</button>
+  </view>
+
+  <!-- Floating Home Button -->
+  <!-- view class="fab-home" bindtap="onGoHome">
+    <text class="home-icon">⌂</text>
+    <text>拼团页</text>
+  </view -->
 </view>

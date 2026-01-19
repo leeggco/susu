@@ -1,15 +1,32 @@
 <navigation-bar title="拼团详情" back="{{true}}" color="#fff" background="#E02E24"></navigation-bar>
-<view class="detail-page" wx:if="{{goods}}">
-  <!-- Use goods-card to display current group info consistent with list -->
-  <view class="goods-card-wrapper">
-    <goods-card item="{{goods}}"></goods-card>
-  </view>
-  
-  <view class="detail-content">
-    <view class="detail-benefit">
-      <view class="benefit-item">拼团满2人立减</view>
-      <view class="benefit-item">平台补贴频道专享</view>
-      <view class="benefit-item">7天无忧退换</view>
+<scroll-view class="scroll-area" scroll-y>
+  <view class="detail-page" wx:if="{{goods}}">
+    <!-- Use goods-card to display current group info consistent with list -->
+    <view class="goods-card-wrapper">
+      <goods-card item="{{goods}}"></goods-card>
+    </view>
+    
+    <view class="detail-content">
+      <view class="detail-benefit">
+        <view class="benefit-item">拼团满2人立减</view>
+        <view class="benefit-item">平台补贴频道专享</view>
+        <view class="benefit-item">7天无忧退换</view>
+      </view>
+    </view>
+
+    <!-- Related Group Buy Section -->
+    <view class="related-section" wx:if="{{relatedGoods.length > 0}}">
+      <view class="divider-header">
+        <view class="divider-line"></view>
+        <text class="divider-text">相关拼团</text>
+        <view class="divider-line"></view>
+      </view>
+      
+      <view class="related-list">
+        <block wx:for="{{relatedGoods}}" wx:key="id">
+          <goods-card item="{{item}}"></goods-card>
+        </block>
+      </view>
     </view>
   </view>
-</view>
+</scroll-view>

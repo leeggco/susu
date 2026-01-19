@@ -1,6 +1,239 @@
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+page {
+  background: #fff;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.publish-container {
+  padding: 0 30rpx;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tabs */
+.tabs-header {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.tab-item {
+  position: relative;
+  padding: 16rpx 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tab-text {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.tab-item.active .tab-text {
+  color: #4a90e2;
+  font-weight: 600;
+}
+
+.tab-line {
+  position: absolute;
+  bottom: 0;
+  width: 40rpx;
+  height: 6rpx;
+  background: #4a90e2;
+  border-radius: 4rpx;
+}
+
+/* Tips */
+.tips-section {
+  margin-top: 30rpx;
+}
+
+.tutorial-link {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 28rpx;
+  margin-bottom: 16rpx;
+}
+
+.help-icon {
+  width: 32rpx;
+  height: 32rpx;
+  border: 1rpx solid #999;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 30rpx;
+  font-size: 22rpx;
+  margin-left: 8rpx;
+  color: #999;
+}
+
+.tip-content {
+  color: #ff6b22;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+/* Upload */
+.upload-section {
+  margin-top: 40rpx;
+  height: 360rpx;
+  border: 2rpx dashed #ddd;
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  overflow: hidden;
+  position: relative;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.plus-icon {
+  font-size: 60rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+  font-weight: 300;
+}
+
+.upload-text {
+  font-size: 32rpx;
+  color: #666;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+}
+
+.re-upload-text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  text-align: center;
+  padding: 10rpx 0;
+  font-size: 24rpx;
+}
+
+/* Options */
+.options-section {
+  margin-top: 50rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.options-label {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 30rpx;
+}
+
+.options-group {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 8rpx 0;
+}
+
+.checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid #dcdcdc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.checkbox.checked {
+  background: #e02e24;
+  border-color: #e02e24;
+  box-shadow: 0 4rpx 10rpx rgba(224, 46, 36, 0.2);
+}
+
+.check-mark {
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.option-text {
+  font-size: 28rpx;
+  color: #666;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.option-text.active-text {
+  color: #333;
+  font-weight: 500;
+}
+
+/* Submit Button */
+.submit-btn-wrapper {
+  margin-top: 80rpx;
+  padding-bottom: 40rpx;
+}
+
+.submit-btn {
+  background: #e02e24;
+  color: #fff;
+  font-size: 36rpx;
+  border-radius: 50rpx;
+  padding: 24rpx 0;
+  font-weight: 500;
+}
+
+.submit-btn:active {
+  opacity: 0.9;
+}
+
+/* FAB Home */
+.fab-home {
+  position: fixed;
+  left: 0;
+  bottom: calc(50rpx + env(safe-area-inset-bottom));
+  background: #e02e24;
+  color: #fff;
+  padding: 16rpx 32rpx 16rpx 24rpx;
+  border-radius: 0 40rpx 40rpx 0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 28rpx;
+  box-shadow: 0 4rpx 12rpx rgba(224, 46, 36, 0.3);
+  z-index: 100;
+  width: 200rpx;
+}
+
+.home-icon {
+  font-size: 50rpx;
+  margin-bottom: 2rpx;
 }

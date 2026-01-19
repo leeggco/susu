@@ -18,7 +18,10 @@ const randomPick = (list) => list[Math.floor(Math.random() * list.length)]
 const getShortTitle = (title) => title.replace(/【.*?】/g, '').slice(0, 10)
 
 const buildNoticeList = (goodsList) =>
-  goodsList.slice(0, 12).map((item) => `用户${randomPick(noticeNames)}刚刚抢到了${getShortTitle(item.title)}`)
+  goodsList.slice(0, 12).map((item) => ({
+    text: `用户${randomPick(noticeNames)}抢到了${getShortTitle(item.title)}`,
+    time: Math.random() > 0.7 ? '刚刚' : '1分钟前'
+  }))
 
 Page({
   data: {

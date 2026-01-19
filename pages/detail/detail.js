@@ -2,7 +2,8 @@ const { getGoodsList, getGoodsById } = require('../../utils/mock')
 
 Page({
   data: {
-    goods: null
+    goods: null,
+    relatedGoods: []
   },
   onLoad(query) {
     const goodsId = Number(query.id)
@@ -16,7 +17,16 @@ Page({
        goods = getGoodsById(goodsId) || list[0]
     }
     
-    this.setData({ goods })
+    // Get related goods (exclude current goods)
+    const allGoods = getGoodsList(10)
+    const relatedGoods = allGoods
+      .filter(item => item.id !== goodsId)
+      .slice(0, 4)
+
+    this.setData({ 
+      goods,
+      relatedGoods
+    })
   },
   handleBuyClick() {
     const goods = this.data.goods
