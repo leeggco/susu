@@ -1,0 +1,23 @@
+<view class="page-container">
+  <navigation-bar title="我发布的拼团" back="{{true}}" color="#000000" background="#ffffff"></navigation-bar>
+  <scroll-view
+    class="scroll-area"
+    scroll-y
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onRefresherRefresh"
+    bindscrolltolower="onReachBottom"
+    lower-threshold="100"
+  >
+    <view wx:if="{{list.length === 0 && !isLoading && !isRefreshing}}" class="empty-text">暂无发布记录</view>
+    <view class="goods-grid">
+      <block wx:for="{{list}}" wx:key="id">
+        <view class="goods-item">
+          <goods-card item="{{item}}" bind:buy="onGoodsTap"></goods-card>
+        </view>
+      </block>
+    </view>
+    <view class="list-footer">{{loadingText}}</view>
+  </scroll-view>
+</view>
+

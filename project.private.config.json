@@ -1,8 +1,8 @@
 {
   "libVersion": "3.14.0",
-  "projectname": "susu",
+  "projectname": "miniprogram-1",
   "setting": {
-    "urlCheck": true,
+    "urlCheck": false,
     "coverView": true,
     "lazyloadPlaceholderEnable": false,
     "skylineRenderEnable": false,

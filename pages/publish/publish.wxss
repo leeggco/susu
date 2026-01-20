@@ -192,6 +192,7 @@ page {
   padding: 16rpx 18rpx;
 }
 
+
 .qr-actions {
   margin-top: 18rpx;
   display: flex;

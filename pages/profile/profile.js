@@ -1,9 +1,7 @@
 const {
   getCurrentUser,
   authorizeUser,
-  getUserStats,
-  getMyPublishedGoods,
-  getMyParticipatedGoods
+  getUserStats
 } = require('../../utils/request')
 
 Page({
@@ -11,8 +9,6 @@ Page({
     user: null,
     postsCount: 0,
     participationsCount: 0,
-    publishedList: [],
-    participatedList: [],
     isLoading: false
   },
   onShow() {
@@ -28,15 +24,10 @@ Page({
 
     try {
       const stats = await getUserStats()
-      const published = await getMyPublishedGoods({ limit: 10, offset: 0 })
-      const participated = await getMyParticipatedGoods({ limit: 10 })
-
       this.setData({
         user: stats.user,
         postsCount: stats.postsCount || 0,
         participationsCount: stats.participationsCount || 0,
-        publishedList: published && Array.isArray(published.list) ? published.list : [],
-        participatedList: Array.isArray(participated) ? participated : [],
         isLoading: false
       })
     } catch (e) {
@@ -46,8 +37,6 @@ Page({
           user: null,
           postsCount: 0,
           participationsCount: 0,
-          publishedList: [],
-          participatedList: [],
           isLoading: false
         })
         return
@@ -68,9 +57,18 @@ Page({
       wx.showToast({ title: msg, icon: 'none' })
     }
   },
-  onGoodsTap(e) {
-    const goods = e && e.detail && e.detail.item ? e.detail.item : null
-    if (!goods || !goods.id) return
-    wx.navigateTo({ url: `/pages/detail/detail?id=${goods.id}` })
+  navToMyPublished() {
+    if (!this.data.user) {
+      wx.showToast({ title: '请先授权', icon: 'none' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/my-published/my-published' })
+  },
+  navToMyParticipated() {
+    if (!this.data.user) {
+      wx.showToast({ title: '请先授权', icon: 'none' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/my-participated/my-participated' })
   }
 })

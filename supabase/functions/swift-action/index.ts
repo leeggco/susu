@@ -50,6 +50,8 @@ const parseJsonLoose = (text: string) => {
   }
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 const normalizeExtracted = (raw: any) => {
   const title = raw && typeof raw.title === "string" ? String(raw.title).trim() : ""
   const price = raw && typeof raw.price === "number" ? Number(raw.price) : null
@@ -63,13 +65,31 @@ const normalizeExtracted = (raw: any) => {
       : raw && typeof raw.is_baiyi_butie === "string"
         ? ["true", "1", "yes", "y"].includes(String(raw.is_baiyi_butie).trim().toLowerCase())
         : false
-  return { title, price, original_price, group_size, missing_count, remaining_hours, is_baiyi_butie }
+
+  return {
+    title,
+    price,
+    original_price,
+    group_size,
+    missing_count,
+    remaining_hours,
+    is_baiyi_butie
+  }
 }
 
-const callGeminiOcr = async (imageBase64: string, mimeType: string) => {
+const shouldRetryGemini = (resStatus: number, data: any) => {
+  if (resStatus === 429 || resStatus === 503) return true
+  const status = typeof data?.error?.status === "string" ? String(data.error.status).toUpperCase() : ""
+  if (status === "UNAVAILABLE" || status === "RESOURCE_EXHAUSTED") return true
+  const msg = typeof data?.error?.message === "string" ? String(data.error.message).toLowerCase() : ""
+  if (msg.includes("overloaded") || msg.includes("try again later")) return true
+  return false
+}
+
+const callGeminiOcrOnce = async (imageBase64: string, mimeType: string, model: string) => {
   if (!GEMINI_API_KEY) throw new Error("missing_gemini_key")
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-    GEMINI_MODEL
+    model || GEMINI_MODEL
   )}:generateContent`
 
   const prompt =
@@ -105,13 +125,42 @@ const callGeminiOcr = async (imageBase64: string, mimeType: string) => {
 
   const data = await res.json().catch(() => null)
   if (!res.ok) {
-    const msg = data && typeof data === "object" ? JSON.stringify(data) : `http_${res.status}`
+    if (shouldRetryGemini(res.status, data)) {
+      throw new Error("gemini_overloaded")
+    }
+    const msg = data && typeof data === "object" ? JSON.stringify(data) : `gemini_http_${res.status}`
     throw new Error(msg)
   }
   const parts = data?.candidates?.[0]?.content?.parts
   const text = Array.isArray(parts) ? parts.map((p: any) => (typeof p?.text === "string" ? p.text : "")).join("\n") : ""
   const parsed = parseJsonLoose(text)
   return normalizeExtracted(parsed)
+}
+
+const callGeminiOcr = async (imageBase64: string, mimeType: string) => {
+  const models = [GEMINI_MODEL].filter(Boolean)
+  const fallback = Deno.env.get("GEMINI_MODEL_FALLBACK") ?? ""
+  if (fallback && fallback !== GEMINI_MODEL) models.push(fallback)
+
+  const maxAttempts = 4
+  let lastErr = ""
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    for (const model of models) {
+      try {
+        return await callGeminiOcrOnce(imageBase64, mimeType, model)
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e)
+        lastErr = msg
+        if (msg !== "gemini_overloaded") throw e
+      }
+    }
+    if (attempt < maxAttempts - 1) {
+      const base = 400 * Math.pow(2, attempt)
+      const jitter = Math.floor(Math.random() * 200)
+      await sleep(base + jitter)
+    }
+  }
+  throw new Error(lastErr || "gemini_overloaded")
 }
 
 const uploadCoverToStorage = async (coverBase64: string, mimeType: string) => {
@@ -157,6 +206,13 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => null)
   if (!body || typeof body !== "object") return json(400, { ok: false, error: "invalid_body" })
 
+  const task =
+    typeof (body as any).task === "string"
+      ? String((body as any).task).trim()
+      : typeof (body as any).action === "string"
+        ? String((body as any).action).trim()
+        : ""
+
   const imageBase64Raw =
     typeof (body as any).image_base64 === "string"
       ? String((body as any).image_base64)
@@ -185,6 +241,19 @@ Deno.serve(async (req) => {
 
   const imageBase64 = stripDataUrlPrefix(imageBase64Raw)
   const coverBase64 = stripDataUrlPrefix(coverBase64Raw)
+
+  if (task === "upload_cover") {
+    if (!coverBase64) return json(400, { ok: false, error: "missing_cover_base64" })
+    if (coverBase64.length > 8_000_000) return json(413, { ok: false, error: "cover_too_large" })
+    try {
+      const coverUrl = await uploadCoverToStorage(coverBase64, coverMimeType)
+      return json(200, { ok: true, cover_image_url: coverUrl || "" })
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      return json(502, { ok: false, error: "upload_failed", message: msg })
+    }
+  }
+
   if (!imageBase64) return json(400, { ok: false, error: "missing_image_base64" })
   if (imageBase64.length > 12_000_000) return json(413, { ok: false, error: "image_too_large" })
   if (coverBase64 && coverBase64.length > 8_000_000) return json(413, { ok: false, error: "cover_too_large" })
@@ -197,6 +266,9 @@ Deno.serve(async (req) => {
     return json(200, { ok: true, cover_image_url: coverUrl || "", ...extracted })
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
+    if (msg === "gemini_overloaded") {
+      return json(503, { ok: false, error: "gemini_overloaded", message: msg })
+    }
     return json(502, { ok: false, error: "ocr_failed", message: msg })
   }
 })

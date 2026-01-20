@@ -3,7 +3,9 @@
     "pages/index/index",
     "pages/publish/publish",
     "pages/profile/profile",
-    "pages/detail/detail"
+    "pages/detail/detail",
+    "pages/my-published/my-published",
+    "pages/my-participated/my-participated"
   ],
   "tabBar": {
     "color": "#999999",

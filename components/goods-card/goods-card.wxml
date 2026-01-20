@@ -1,10 +1,17 @@
 <view class="goods-card" bindtap="onCtaTap">
   <view class="card-body">
     <view class="thumb-wrap">
-      <image class="thumb" src="{{item.image}}" mode="aspectFill"></image>
+      <image class="thumb" src="{{item.image}}" mode="widthFix" bindload="onImageLoad" binderror="onImageError"></image>
+      <view class="thumb-fallback" wx:if="{{imageStatus === 'error' || imageStatus === 'empty'}}">
+        <text class="thumb-fallback-title" wx:if="{{imageStatus === 'empty'}}">无封面</text>
+        <block wx:else>
+          <text class="thumb-fallback-title">封面加载失败</text>
+          <text class="thumb-fallback-sub" wx:if="{{imageErrorText}}">{{imageErrorText}}</text>
+        </block>
+      </view>
       <view class="tag-platform" wx:if="{{item.platform}}">{{item.platform}}</view>
       <view class="tag-group-size">{{groupSize}}人团</view>
-      <view class="tag-subsidy" wx:if="{{item.sales_tip === '百亿补贴'}}">百亿补贴</view>
+      <!--view class="tag-subsidy" wx:if="{{item.sales_tip === '百亿补贴'}}">百亿补贴</view-->
     </view>
     <view class="info">
       <view class="title-row">

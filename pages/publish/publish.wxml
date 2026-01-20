@@ -36,7 +36,7 @@
   <view class="qr-result-section" wx:if="{{uploadedImage}}">
     <view class="status-list">
       <view class="status-row">
-        <text class="status-label">上传截图</text>
+        <text class="status-label">上传图片</text>
         <text class="status-mark" wx:if="{{uploadedImage}}">✔</text>
       </view>
       <view class="status-row">
@@ -55,9 +55,8 @@
   </view>
 
   <canvas canvas-id="qrCanvas" class="qr-canvas" style="width:{{canvasW}}px;height:{{canvasH}}px;" width="{{canvasW}}" height="{{canvasH}}"></canvas>
-  <canvas canvas-id="coverCanvas" class="qr-canvas" style="width:{{coverCanvasW}}px;height:{{coverCanvasH}}px;" width="{{coverCanvasW}}" height="{{coverCanvasH}}"></canvas>
 
-  <view class="options-section">
+  <!--view class="options-section">
     <text class="options-label">置顶拼团</text>
     <view class="options-group">
       <block wx:for="{{topOptions}}" wx:key="value">
@@ -69,7 +68,7 @@
         </view>
       </block>
     </view>
-  </view>
+  </view-->
 
   <view class="submit-btn-wrapper">
     <button class="submit-btn" bindtap="onSubmit" disabled="{{!canSubmit}}">发布拼团</button>

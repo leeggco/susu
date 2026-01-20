@@ -1,0 +1,47 @@
+page {
+  background: #f7f7f7;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.scroll-area {
+  flex: 1;
+  height: 0;
+  width: 100%;
+}
+
+.goods-grid {
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx 20rpx 0;
+  gap: 18rpx;
+}
+
+.goods-item {
+  width: 100%;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: #999999;
+  padding: 48rpx 0 0;
+  text-align: center;
+}
+
+.list-footer {
+  text-align: center;
+  padding-top: 80rpx;
+  padding-bottom: calc(220rpx + env(safe-area-inset-bottom));
+  color: #9a9a9a;
+  font-size: 24rpx;
+}
+

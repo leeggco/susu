@@ -18,18 +18,6 @@ const canvasGetImageData = (options) =>
     })
   })
 
-const canvasToTempFilePath = (options, instance) =>
-  new Promise((resolve, reject) => {
-    wx.canvasToTempFilePath(
-      {
-        ...options,
-        success: resolve,
-        fail: reject
-      },
-      instance
-    )
-  })
-
 const nextTick = () =>
   new Promise((resolve) => {
     if (wx.nextTick) {
@@ -41,7 +29,7 @@ const nextTick = () =>
 
 Page({
   data: {
-    tabs: ['拼多多', '淘宝', '抖音'],
+    tabs: ['拼多多'],
     activeTab: 0,
     topOptions: [
       { label: '暂不', value: 0 },
@@ -55,8 +43,6 @@ Page({
     qrStatusText: '',
     canvasW: 0,
     canvasH: 0,
-    coverCanvasW: 0,
-    coverCanvasH: 0,
     isFetchingInfo: false,
     fetchedTitle: '',
     fetchedPrice: null,
@@ -65,14 +51,66 @@ Page({
     fetchedMissingCount: null,
     fetchedRemainingHours: null,
     fetchedIsBaiyiButie: false,
-    fetchedCoverImageUrl: '',
     fetchErrorText: '',
     recognizeState: 'idle',
-    recognizeHint: '上传截图后自动识别',
+    recognizeHint: '上传图片后自动识别',
     canSubmit: false,
     checkingDuplicate: false,
     duplicatePostId: '',
     duplicatePromptedOrderLink: ''
+  },
+
+  getFormStateSnapshot() {
+    const d = this.data
+    return {
+      uploadedImage: d.uploadedImage,
+      orderLink: d.orderLink,
+      qrStatus: d.qrStatus,
+      qrStatusText: d.qrStatusText,
+      canvasW: d.canvasW,
+      canvasH: d.canvasH,
+      isFetchingInfo: d.isFetchingInfo,
+      fetchedTitle: d.fetchedTitle,
+      fetchedPrice: d.fetchedPrice,
+      fetchedOriginalPrice: d.fetchedOriginalPrice,
+      fetchedGroupSize: d.fetchedGroupSize,
+      fetchedMissingCount: d.fetchedMissingCount,
+      fetchedRemainingHours: d.fetchedRemainingHours,
+      fetchedIsBaiyiButie: d.fetchedIsBaiyiButie,
+      fetchErrorText: d.fetchErrorText,
+      recognizeState: d.recognizeState,
+      recognizeHint: d.recognizeHint,
+      canSubmit: d.canSubmit,
+      checkingDuplicate: d.checkingDuplicate,
+      duplicatePostId: d.duplicatePostId,
+      duplicatePromptedOrderLink: d.duplicatePromptedOrderLink
+    }
+  },
+
+  resetForm() {
+    this.setData({
+      uploadedImage: '',
+      orderLink: '',
+      qrStatus: 'idle',
+      qrStatusText: '',
+      canvasW: 0,
+      canvasH: 0,
+      isFetchingInfo: false,
+      fetchedTitle: '',
+      fetchedPrice: null,
+      fetchedOriginalPrice: null,
+      fetchedGroupSize: null,
+      fetchedMissingCount: null,
+      fetchedRemainingHours: null,
+      fetchedIsBaiyiButie: false,
+      fetchErrorText: '',
+      recognizeState: 'idle',
+      recognizeHint: '上传图片后自动识别',
+      canSubmit: false,
+      checkingDuplicate: false,
+      duplicatePostId: '',
+      duplicatePromptedOrderLink: ''
+    })
   },
 
   updateRecognizeState() {
@@ -80,14 +118,17 @@ Page({
     const qrOk = this.data.qrStatus === 'success' && Boolean(String(this.data.orderLink || '').trim())
     const ocrOk = Boolean(String(this.data.fetchedTitle || '').trim()) && !this.data.fetchErrorText
     const duplicate = Boolean(this.data.duplicatePostId)
-    const processing = Boolean(this.data.isFetchingInfo) || this.data.qrStatus === 'scanning' || Boolean(this.data.checkingDuplicate)
+    const processing =
+      Boolean(this.data.isFetchingInfo) ||
+      this.data.qrStatus === 'scanning' ||
+      Boolean(this.data.checkingDuplicate)
 
     let recognizeState = 'idle'
     let recognizeHint = ''
 
     if (!uploadedOk) {
       recognizeState = 'idle'
-      recognizeHint = '上传截图后自动识别'
+      recognizeHint = '上传图片后自动识别'
     } else if (processing) {
       recognizeState = 'processing'
       recognizeHint = '正在识别拼团信息...'
@@ -96,15 +137,15 @@ Page({
       recognizeHint = '该拼团已发布，建议直接参与，成团更快'
     } else if (qrOk && ocrOk) {
       recognizeState = 'success'
-      recognizeHint = '上传截图✔，识别拼团信息✔'
+      recognizeHint = '上传图片✔，识别拼团信息✔'
     } else if (uploadedOk && !qrOk && !ocrOk && this.data.qrStatus === 'idle' && !this.data.fetchErrorText) {
       recognizeState = 'processing'
       recognizeHint = '正在识别拼团信息...'
     } else {
       recognizeState = 'failed'
-      if (this.data.fetchErrorText) recognizeHint = '未识别到拼团信息，请更换更清晰的截图重试'
-      else if (this.data.qrStatus === 'failed') recognizeHint = '未识别到二维码，请更换截图重试'
-      else recognizeHint = '请更换截图重试'
+      if (this.data.fetchErrorText) recognizeHint = '未识别到拼团信息，请更换更清晰的图片重试'
+      else if (this.data.qrStatus === 'failed') recognizeHint = '未识别到二维码，请更换图片重试'
+      else recognizeHint = '请更换图片重试'
     }
 
     const canSubmit = uploadedOk && qrOk && ocrOk && !duplicate && !processing
@@ -128,15 +169,19 @@ Page({
 
         if (this.data.duplicatePromptedOrderLink !== link) {
           this.setData({ duplicatePromptedOrderLink: link })
+        const snapshot = this.getFormStateSnapshot()
           wx.showModal({
             title: '重复拼团',
             content: '该拼团已有人发布，建议直接参与，成团更快。',
             confirmText: '去查看',
             cancelText: '我知道了',
             success: (res) => {
+            this.setData(snapshot, () => {
+              this.updateRecognizeState()
               if (res.confirm) {
                 wx.navigateTo({ url: `/pages/detail/detail?id=${dup.id}` })
               }
+            })
             }
           })
         }
@@ -175,7 +220,6 @@ Page({
           fetchedMissingCount: null,
           fetchedRemainingHours: null,
           fetchedIsBaiyiButie: false,
-          fetchedCoverImageUrl: '',
           fetchErrorText: '',
           recognizeState: 'processing',
           recognizeHint: '正在识别拼团信息...',
@@ -311,48 +355,6 @@ Page({
     }
   },
 
-  async cropCoverFromScreenshot(filePath, mimeType) {
-    const info = await getImageInfo(filePath)
-    const width = Number(info.width) || 0
-    const height = Number(info.height) || 0
-    if (!width || !height) return ''
-
-    const square = Math.max(240, Math.min(width, Math.round(width * 0.72)))
-    const x = Math.max(0, Math.round((width - square) / 2))
-    let y = Math.round(height * 0.12)
-    if (y + square > height) y = Math.max(0, height - square)
-
-    const dst = Math.max(240, Math.min(720, square))
-    this.setData({ coverCanvasW: dst, coverCanvasH: dst })
-    await nextTick()
-
-    const ctx = wx.createCanvasContext('coverCanvas', this)
-    ctx.clearRect(0, 0, dst, dst)
-    ctx.drawImage(filePath, x, y, square, square, 0, 0, dst, dst)
-
-    await new Promise((resolve) => {
-      ctx.draw(false, () => resolve())
-    })
-
-    const fileType = String(mimeType || 'image/jpeg').toLowerCase().includes('png') ? 'png' : 'jpg'
-    const res = await canvasToTempFilePath(
-      {
-        canvasId: 'coverCanvas',
-        x: 0,
-        y: 0,
-        width: dst,
-        height: dst,
-        destWidth: dst,
-        destHeight: dst,
-        fileType,
-        quality: 0.92
-      },
-      this
-    ).catch(() => null)
-
-    return res && res.tempFilePath ? String(res.tempFilePath) : ''
-  },
-
   async extractProductInfoFromImage(filePath) {
     if (!filePath) return
     try {
@@ -365,7 +367,6 @@ Page({
         fetchedMissingCount: null,
         fetchedRemainingHours: null,
         fetchedIsBaiyiButie: false,
-        fetchedCoverImageUrl: '',
         fetchErrorText: ''
       })
       this.updateRecognizeState()
@@ -382,37 +383,36 @@ Page({
           fail: () => resolve('image/jpeg')
         })
       })
-      const coverFilePath = await this.cropCoverFromScreenshot(filePath, mimeType).catch(() => '')
-      console.log('[Cover] crop tempFilePath:', coverFilePath)
-      const result = await ocrScreenshot({
-        filePath,
-        mimeType,
-        coverFilePath: coverFilePath || '',
-        coverMimeType: mimeType
-      })
-      console.log('[OCR] result:', result)
-      console.log('[Cover] cover_image_url:', result && result.cover_image_url ? String(result.cover_image_url) : '')
+      const result = await ocrScreenshot({ filePath, mimeType })
 
       this.setData({
         isFetchingInfo: false,
         fetchedTitle: result && result.title ? String(result.title) : '',
         fetchedPrice: result && typeof result.price === 'number' ? result.price : null,
-        fetchedOriginalPrice: result && typeof result.original_price === 'number' ? result.original_price : null,
+        fetchedOriginalPrice:
+          result && typeof result.original_price === 'number' ? result.original_price : null,
         fetchedGroupSize: result && typeof result.group_size === 'number' ? result.group_size : null,
-        fetchedMissingCount: result && typeof result.missing_count === 'number' ? result.missing_count : null,
-        fetchedRemainingHours: result && typeof result.remaining_hours === 'number' ? result.remaining_hours : null,
-        fetchedIsBaiyiButie: result && typeof result.is_baiyi_butie === 'boolean' ? result.is_baiyi_butie : false,
-        fetchedCoverImageUrl: result && result.cover_image_url ? String(result.cover_image_url) : '',
-        fetchErrorText: !result || !result.title ? '未能从截图识别到商品信息' : ''
+        fetchedMissingCount:
+          result && typeof result.missing_count === 'number' ? result.missing_count : null,
+        fetchedRemainingHours:
+          result && typeof result.remaining_hours === 'number' ? result.remaining_hours : null,
+        fetchedIsBaiyiButie:
+          result && typeof result.is_baiyi_butie === 'boolean' ? result.is_baiyi_butie : false,
+        fetchErrorText: !result || !result.title ? '未能从图片识别到商品信息' : ''
       })
       this.updateRecognizeState()
       this.checkDuplicateIfNeeded()
     } catch (e) {
       console.error('Fetch info failed:', e)
       const msg = e && e.message ? String(e.message) : (e && e.errMsg ? String(e.errMsg) : '未知错误')
+      const isBusy =
+        msg === 'gemini_overloaded' ||
+        msg.includes('UNAVAILABLE') ||
+        msg.toLowerCase().includes('overloaded') ||
+        msg.toLowerCase().includes('try again later')
       this.setData({
         isFetchingInfo: false,
-        fetchErrorText: `请求失败：${msg}`
+        fetchErrorText: isBusy ? '识别服务繁忙，请稍后重试' : `请求失败：${msg}`,
       })
       this.updateRecognizeState()
     }
@@ -443,7 +443,7 @@ Page({
   },
 
   async onSubmit() {
-    const { addPublishedGoods, findDuplicateGroupPost } = require('../../utils/request')
+    const { addPublishedGoods, findDuplicateGroupPost, uploadCoverImage } = require('../../utils/request')
 
     if (!this.data.uploadedImage) {
       wx.showToast({
@@ -492,23 +492,46 @@ Page({
         wx.hideLoading()
         this.setData({ duplicatePostId: String(dup.id) })
         this.updateRecognizeState()
+        const snapshot = this.getFormStateSnapshot()
         wx.showModal({
           title: '重复拼团',
           content: '该拼团已有人发布，建议直接参与，成团更快。',
           confirmText: '去查看',
           cancelText: '我知道了',
           success: (res) => {
-            if (res.confirm) {
-              wx.navigateTo({ url: `/pages/detail/detail?id=${dup.id}` })
-            }
+            this.setData(snapshot, () => {
+              this.updateRecognizeState()
+              if (res.confirm) {
+                wx.navigateTo({ url: `/pages/detail/detail?id=${dup.id}` })
+              }
+            })
           }
         })
         return
       }
 
+      const mimeType = await new Promise((resolve) => {
+        wx.getImageInfo({
+          src: this.data.uploadedImage,
+          success: (info) => {
+            const t = info && info.type ? String(info.type).toLowerCase() : ''
+            if (t === 'png') resolve('image/png')
+            else resolve('image/jpeg')
+          },
+          fail: () => resolve('image/jpeg')
+        })
+      })
+      const up = await uploadCoverImage({ filePath: this.data.uploadedImage, mimeType })
+      const coverUrl = up && up.cover_image_url ? String(up.cover_image_url) : ''
+      if (!coverUrl) {
+        wx.hideLoading()
+        wx.showToast({ title: '封面上传失败', icon: 'none' })
+        return
+      }
+
       const created = await addPublishedGoods({
         title: this.data.fetchedTitle || '【3人团】新发布拼团...',
-        image: this.data.fetchedCoverImageUrl || '',
+        image: coverUrl,
         platform,
         order_link: link,
         top_until: topUntil,
@@ -526,6 +549,7 @@ Page({
       })
 
       wx.hideLoading()
+      this.resetForm()
       wx.showToast({ title: '发布成功', icon: 'success' })
       if (created && created.id) {
         setTimeout(() => {

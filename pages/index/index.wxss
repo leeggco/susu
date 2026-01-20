@@ -60,6 +60,19 @@ page {
   justify-content: center;
 }
 
+.search-clear {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 26rpx;
+  background: #f2f2f2;
+  color: #666666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34rpx;
+  line-height: 1;
+}
+
 .goods-grid {
   display: flex;
   flex-direction: column;

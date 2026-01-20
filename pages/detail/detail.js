@@ -76,7 +76,12 @@ const tryNavigateToPdd = (path, orderLink) => {
 Page({
   data: {
     goods: null,
-    relatedGoods: []
+    relatedGoods: [],
+    heroRemainCount: 0,
+    heroGroupSize: 3,
+    heroCountdown: { h: '00', m: '00', s: '00', ms: '0' },
+    heroHasEndTime: false,
+    heroImageStatus: 'idle'
   },
   async onLoad(query) {
     const goodsId = query && query.id ? String(query.id) : ''
@@ -104,6 +109,7 @@ Page({
         goods,
         relatedGoods: related || []
       })
+      this.setupHero(goods)
       wx.hideLoading()
     } catch (e) {
       wx.hideLoading()
@@ -111,6 +117,68 @@ Page({
       wx.showToast({ title: msg, icon: 'none' })
     }
   },
+  onUnload() {
+    this.stopHeroTimer()
+  },
+
+  setupHero(goods) {
+    const groupSize = goods && goods.group_size ? Number(goods.group_size) : 3
+    const joined = goods && typeof goods.joined_count === 'number' ? goods.joined_count : 0
+    const remain = Math.max(0, groupSize - Math.max(0, joined))
+    const hasEndTime = Boolean(goods && goods.end_time)
+    const imageStatus = goods && goods.image ? 'loading' : 'empty'
+    this.setData({
+      heroGroupSize: groupSize,
+      heroRemainCount: remain,
+      heroHasEndTime: hasEndTime,
+      heroImageStatus: imageStatus
+    })
+    if (hasEndTime) this.startHeroTimer(goods.end_time)
+  },
+
+  startHeroTimer(endTime) {
+    this.stopHeroTimer()
+    const tick = () => {
+      const now = Date.now()
+      const diff = endTime - now
+      if (diff <= 0) {
+        this.setData({ heroCountdown: { h: '00', m: '00', s: '00', ms: '0' } })
+        this.stopHeroTimer()
+        return
+      }
+      const h = Math.floor(diff / 3600000)
+      const m = Math.floor((diff % 3600000) / 60000)
+      const s = Math.floor((diff % 60000) / 1000)
+      const ms = Math.floor((diff % 1000) / 100)
+      const pad = (n) => n.toString().padStart(2, '0')
+      this.setData({
+        heroCountdown: {
+          h: pad(h),
+          m: pad(m),
+          s: pad(s),
+          ms: ms.toString()
+        }
+      })
+    }
+    tick()
+    this.heroTimer = setInterval(tick, 100)
+  },
+
+  stopHeroTimer() {
+    if (this.heroTimer) {
+      clearInterval(this.heroTimer)
+      this.heroTimer = null
+    }
+  },
+
+  onHeroImageLoad() {
+    this.setData({ heroImageStatus: 'ok' })
+  },
+
+  onHeroImageError() {
+    this.setData({ heroImageStatus: 'error' })
+  },
+
   onCopyOrderLink() {
     const goods = this.data.goods
     if (!goods || !goods.order_link) return
@@ -134,76 +202,72 @@ Page({
       return
     }
 
-    if ((goods.platform === '拼多多' || goods.platform === 'PDD') && goods.order_link) {
-      try {
-        await ensureUser({ interactive: true })
-      } catch (e) {
-        wx.showToast({ title: '需要先授权登录', icon: 'none' })
-        return
+    try {
+      await ensureUser({ interactive: true })
+    } catch (e) {
+      wx.showToast({ title: '需要先授权登录', icon: 'none' })
+      return
+    }
+
+    try {
+      await addParticipation({ postId: goods.id, action: 'click_buy' })
+    } catch (e) {}
+
+    const orderLink = goods.order_link ? String(goods.order_link) : ''
+
+    if ((goods.platform === '拼多多' || goods.platform === 'PDD') && orderLink) {
+      const candidates = []
+      const mainPath = getPddPathFromOrderLink(orderLink)
+      if (mainPath) candidates.push(mainPath)
+      if (orderLink.startsWith('http://') || orderLink.startsWith('https://')) {
+        candidates.push(`pages/web/web?specialUrl=1&src=${encodeURIComponent(orderLink)}`)
       }
 
-      try {
-        await addParticipation({ postId: goods.id, action: 'click_buy' })
-      } catch (e) {}
+      const unique = Array.from(new Set(candidates)).filter(Boolean)
 
-      const orderLink = goods.order_link
-      console.log('%c [ orderLink ]-150', 'font-size:13px; background:pink; color:#bf2c9f;', orderLink)
-      const path = getPddPathFromOrderLink(orderLink)
-      
       wx.showLoading({ title: '正在跳转...', mask: true })
-      
-      let success = await tryNavigateToPdd(path, orderLink)
-      
-      // If the first path fails OR it's a short link and we want to try an alternative
-      const isShortLink = orderLink.includes('pinduoduo.com') || orderLink.includes('yangkeduo.com')
-      if (!success && isShortLink) {
-        // Try multiple common PDD proxy paths
-        const altPaths = [
-          `pages/web/web?specialUrl=1&src=${encodeURIComponent(orderLink)}`,
-          `pages/web/web?src=${encodeURIComponent(orderLink)}`,
-          `pages/web/web?url=${encodeURIComponent(orderLink)}`,
-          `package_a/promotion_url/promotion_url?url=${encodeURIComponent(orderLink)}`,
-          `package_a/welfare_coupon/welfare_coupon?url=${encodeURIComponent(orderLink)}`
-        ]
-        
-        for (const altPath of altPaths) {
-          console.log('%c [ altPath ]-170', 'font-size:13px; background:pink; color:#bf2c9f;', altPath)
-          success = await tryNavigateToPdd(altPath, orderLink)
-          if (success) break
-        }
+      let success = false
+      for (const p of unique) {
+        success = await tryNavigateToPdd(p, orderLink)
+        if (success) break
       }
-
       wx.hideLoading()
 
-      if (!success) {
-        wx.showModal({
-          title: '跳转失败',
-          content: '无法跳转拼多多小程序，建议复制链接后手动打开拼多多。',
-          confirmText: '复制链接',
-          success: (res) => {
-            if (res.confirm) {
-              wx.setClipboardData({
-                data: orderLink,
-                success: () => {
-                  wx.showToast({ title: '链接已复制', icon: 'success' })
-                }
-              })
-            }
-          }
-        })
-      }
+      // if (!success) {
+      //   wx.showModal({
+      //     title: '跳转失败',
+      //     content: '无法跳转拼多多小程序，建议复制链接后手动打开拼多多。',
+      //     confirmText: '复制链接',
+      //     success: (res) => {
+      //       if (!res.confirm) return
+      //       wx.setClipboardData({
+      //         data: orderLink,
+      //         success: () => {
+      //           wx.showToast({ title: '链接已复制', icon: 'success' })
+      //         }
+      //       })
+      //     }
+      //   })
+      // }
+      return
+    }
+
+    if (!orderLink) {
+      wx.showToast({ title: '暂无跳转链接', icon: 'none' })
       return
     }
 
     wx.showModal({
-      title: '提示',
-      content: '正在为您接入拼多多补贴频道...',
-      showCancel: false,
-      success: () => {
-        // CPS 导购跳转到目标小程序完成交易
-        wx.navigateToMiniProgram({
-          appId: goods.app_id,
-          path: goods.path
+      title: '打开拼团链接',
+      content: '已为你准备好链接，复制后到对应 App 打开。',
+      confirmText: '复制链接',
+      success: (res) => {
+        if (!res.confirm) return
+        wx.setClipboardData({
+          data: orderLink,
+          success: () => {
+            wx.showToast({ title: '链接已复制', icon: 'success' })
+          }
         })
       }
     })

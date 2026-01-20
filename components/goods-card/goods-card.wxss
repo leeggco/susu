@@ -102,6 +102,34 @@
   height: 100%;
 }
 
+.thumb-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14rpx;
+  box-sizing: border-box;
+  background: #f8f8f8;
+  z-index: 2;
+}
+
+.thumb-fallback-title {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 600;
+}
+
+.thumb-fallback-sub {
+  margin-top: 8rpx;
+  font-size: 18rpx;
+  color: #999;
+  line-height: 1.3;
+  word-break: break-all;
+  text-align: center;
+}
+
 .tag-platform {
   position: absolute;
   left: 0;

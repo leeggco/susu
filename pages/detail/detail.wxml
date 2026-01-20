@@ -9,22 +9,7 @@
     <view class="share-section">
       <button class="share-btn" open-type="share">分享给微信好友</button>
     </view>
-    
-    <view class="detail-content">
-      <view class="detail-benefit">
-        <view class="benefit-item">拼团满2人立减</view>
-        <view class="benefit-item">平台补贴频道专享</view>
-        <view class="benefit-item">7天无忧退换</view>
-      </view>
 
-      <view class="order-link-section" wx:if="{{goods.order_link}}">
-        <view class="order-link-title">下单链接</view>
-        <view class="order-link-text">{{goods.order_link}}</view>
-        <view class="order-link-actions">
-          <view class="order-link-btn" bindtap="onCopyOrderLink">复制链接</view>
-        </view>
-      </view>
-    </view>
 
     <!-- Related Group Buy Section -->
     <view class="related-section" wx:if="{{relatedGoods.length > 0}}">

@@ -14,30 +14,14 @@
 
 <view class="profile-container">
   <view class="stats-card" wx:if="{{user}}">
-    <view class="stat-item">
+    <view class="stat-item" bindtap="navToMyPublished">
       <view class="stat-num">{{postsCount}}</view>
       <view class="stat-label">发布</view>
     </view>
     <view class="stat-split"></view>
-    <view class="stat-item">
+    <view class="stat-item" bindtap="navToMyParticipated">
       <view class="stat-num">{{participationsCount}}</view>
       <view class="stat-label">参团</view>
-    </view>
-  </view>
-
-  <view class="section" wx:if="{{user}}">
-    <view class="section-title">我发布的拼团</view>
-    <view wx:if="{{publishedList.length === 0}}" class="empty-text">暂无发布记录</view>
-    <view wx:else class="goods-list">
-      <goods-card wx:for="{{publishedList}}" wx:key="id" item="{{item}}" bind:buy="onGoodsTap"></goods-card>
-    </view>
-  </view>
-
-  <view class="section" wx:if="{{user}}">
-    <view class="section-title">我参与的拼团</view>
-    <view wx:if="{{participatedList.length === 0}}" class="empty-text">暂无参团记录</view>
-    <view wx:else class="goods-list">
-      <goods-card wx:for="{{participatedList}}" wx:key="id" item="{{item}}" bind:buy="onGoodsTap"></goods-card>
     </view>
   </view>
 </view>

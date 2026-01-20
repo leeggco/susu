@@ -16,6 +16,9 @@ const storageKeys = {
   authSkipped: 'sb_auth_skipped_v1'
 }
 
+const DEFAULT_AVATAR_URL =
+  'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'
+
 const requestJson = (url, { method = 'GET', headers = {}, data = undefined } = {}) =>
   new Promise((resolve, reject) => {
     wx.request({
@@ -72,7 +75,17 @@ const getCurrentUser = () => {
     const id = wx.getStorageSync(storageKeys.userId)
     const profile = wx.getStorageSync(storageKeys.userProfile)
     if (!id) return null
-    return { id: String(id), profile: profile && typeof profile === 'object' ? profile : null }
+    if (!profile || typeof profile !== 'object') {
+      return { id: String(id), profile: { avatar_url: DEFAULT_AVATAR_URL } }
+    }
+    const avatar = profile.avatar_url ? String(profile.avatar_url).trim() : ''
+    return {
+      id: String(id),
+      profile: {
+        ...profile,
+        avatar_url: avatar ? avatar : DEFAULT_AVATAR_URL
+      }
+    }
   } catch (e) {
     return null
   }
@@ -103,7 +116,7 @@ const upsertUser = async (wxProfile) => {
   const body = {
     client_id: clientId,
     nickname: userInfo.nickName ? String(userInfo.nickName) : null,
-    avatar_url: userInfo.avatarUrl ? String(userInfo.avatarUrl) : null,
+    avatar_url: userInfo.avatarUrl ? String(userInfo.avatarUrl) : DEFAULT_AVATAR_URL,
     gender: typeof userInfo.gender === 'number' ? userInfo.gender : null,
     country: userInfo.country ? String(userInfo.country) : null,
     province: userInfo.province ? String(userInfo.province) : null,
@@ -493,6 +506,38 @@ const ocrScreenshot = async (
   }
 }
 
+const uploadCoverImage = async ({ filePath, mimeType = 'image/jpeg' } = {}) => {
+  const { supabaseFunctionsBaseUrl, supabaseScrapeKey } = getConfig()
+  if (!supabaseFunctionsBaseUrl) {
+    throw new Error('missing_supabase_functions_base_url')
+  }
+  if (!filePath) throw new Error('missing_file_path')
+
+  const coverBase64 = await readFileAsBase64(filePath)
+  if (!coverBase64) throw new Error('read_image_failed')
+
+  const url = `${supabaseFunctionsBaseUrl}/swift-action`
+  const headers = {
+    ...buildAuthHeaders()
+  }
+  if (supabaseScrapeKey) {
+    headers['x-scrape-key'] = supabaseScrapeKey
+  }
+  const res = await requestJson(url, {
+    method: 'POST',
+    headers,
+    data: {
+      task: 'upload_cover',
+      cover_image_base64: coverBase64,
+      cover_mime_type: String(mimeType || 'image/jpeg')
+    }
+  })
+  if (!res || !res.data || res.data.ok !== true) {
+    throw new Error(res && res.data && res.data.error ? String(res.data.error) : 'upload_failed')
+  }
+  return { cover_image_url: res.data.cover_image_url ? String(res.data.cover_image_url) : '' }
+}
+
 module.exports = {
   getAuthSkipped,
   setAuthSkipped,
@@ -508,5 +553,6 @@ module.exports = {
   getRelatedGoods,
   addPublishedGoods,
   addParticipation,
-  ocrScreenshot
+  ocrScreenshot,
+  uploadCoverImage
 }

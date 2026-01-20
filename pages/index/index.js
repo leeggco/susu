@@ -88,6 +88,11 @@ Page({
     this.setData({ offset: 0, hasMore: true })
     this.loadHomeData({ reset: true })
   },
+  onClearSearch() {
+    if (!String(this.data.searchValue || '').trim()) return
+    this.setData({ searchValue: '', offset: 0, hasMore: true, isRefreshing: true })
+    this.loadHomeData({ reset: true })
+  },
   onLoad() {
     this.setData({ offset: 0, hasMore: true })
     this.loadHomeData({ reset: true })

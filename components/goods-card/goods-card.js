@@ -13,7 +13,9 @@ Component({
     savePrice: '',
     groupSize: 3,
     remainCount: 0,
-    countdown: { h: '00', m: '00', s: '00', ms: '0' }
+    countdown: { h: '00', m: '00', s: '00', ms: '0' },
+    imageStatus: 'idle',
+    imageErrorText: ''
   },
   lifetimes: {
     detached() {
@@ -30,6 +32,8 @@ Component({
         savePrice,
         groupSize,
         remainCount,
+        imageStatus: item && item.image ? 'loading' : 'empty',
+        imageErrorText: ''
       })
       
       if (item.end_time) {
@@ -39,6 +43,37 @@ Component({
     
     onCtaTap() {
       this.triggerEvent('buy', { item: this.properties.item })
+    },
+
+    onImageLoad() {
+      this.setData({ imageStatus: 'ok', imageErrorText: '' })
+    },
+
+    onImageError() {
+      this.setData({ imageStatus: 'error' })
+      try {
+        const key = 'img_domain_tip_shown'
+        if (wx.getStorageSync(key)) return
+        wx.setStorageSync(key, 1)
+        const src = this.properties && this.properties.item && this.properties.item.image ? String(this.properties.item.image) : ''
+        const m = src.match(/^https?:\/\/([^/]+)/i)
+        const host = m && m[1] ? String(m[1]) : ''
+        const domain = host ? `https://${host}` : '图片域名'
+        wx.getImageInfo({
+          src,
+          success: () => {},
+          fail: (err) => {
+            const errMsg = err && err.errMsg ? String(err.errMsg) : ''
+            this.setData({ imageErrorText: errMsg })
+          }
+        })
+        wx.showModal({
+          title: '图片未显示',
+          content:
+            `请在小程序后台「开发-开发设置-服务器域名」中将 ${domain} 加入 downloadFile 合法域名，然后重新编译预览。`,
+          showCancel: false
+        })
+      } catch (e) {}
     },
     
     startTimer(endTime) {
