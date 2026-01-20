@@ -55,6 +55,7 @@
   </view>
 
   <canvas canvas-id="qrCanvas" class="qr-canvas" style="width:{{canvasW}}px;height:{{canvasH}}px;" width="{{canvasW}}" height="{{canvasH}}"></canvas>
+  <canvas canvas-id="coverCanvas" class="qr-canvas" style="width:{{coverCanvasW}}px;height:{{coverCanvasH}}px;" width="{{coverCanvasW}}" height="{{coverCanvasH}}"></canvas>
 
   <view class="options-section">
     <text class="options-label">置顶拼团</text>

@@ -55,6 +55,8 @@ Page({
     qrStatusText: '',
     canvasW: 0,
     canvasH: 0,
+    coverCanvasW: 0,
+    coverCanvasH: 0,
     isFetchingInfo: false,
     fetchedTitle: '',
     fetchedPrice: null,
@@ -321,10 +323,10 @@ Page({
     if (y + square > height) y = Math.max(0, height - square)
 
     const dst = Math.max(240, Math.min(720, square))
-    this.setData({ canvasW: dst, canvasH: dst })
+    this.setData({ coverCanvasW: dst, coverCanvasH: dst })
     await nextTick()
 
-    const ctx = wx.createCanvasContext('qrCanvas', this)
+    const ctx = wx.createCanvasContext('coverCanvas', this)
     ctx.clearRect(0, 0, dst, dst)
     ctx.drawImage(filePath, x, y, square, square, 0, 0, dst, dst)
 
@@ -335,7 +337,7 @@ Page({
     const fileType = String(mimeType || 'image/jpeg').toLowerCase().includes('png') ? 'png' : 'jpg'
     const res = await canvasToTempFilePath(
       {
-        canvasId: 'qrCanvas',
+        canvasId: 'coverCanvas',
         x: 0,
         y: 0,
         width: dst,
@@ -381,6 +383,7 @@ Page({
         })
       })
       const coverFilePath = await this.cropCoverFromScreenshot(filePath, mimeType).catch(() => '')
+      console.log('[Cover] crop tempFilePath:', coverFilePath)
       const result = await ocrScreenshot({
         filePath,
         mimeType,
@@ -388,6 +391,7 @@ Page({
         coverMimeType: mimeType
       })
       console.log('[OCR] result:', result)
+      console.log('[Cover] cover_image_url:', result && result.cover_image_url ? String(result.cover_image_url) : '')
 
       this.setData({
         isFetchingInfo: false,
