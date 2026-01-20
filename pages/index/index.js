@@ -1,4 +1,4 @@
-const { getGoodsList } = require('../../utils/mock')
+const { getGoodsList, getAuthSkipped, setAuthSkipped, authorizeUser, getCurrentUser } = require('../../utils/request')
 
 const noticeNames = [
   '小雨',
@@ -30,7 +30,49 @@ Page({
     loadingText: '上拉加载更多',
     isLoading: false,
     isRefreshing: false,
-    searchValue: ''
+    searchValue: '',
+    hasMore: true,
+    offset: 0
+  },
+  async loadHomeData({ reset = false } = {}) {
+    const limit = 20
+    const nextOffset = reset ? 0 : Number(this.data.offset) || 0
+    const query = String(this.data.searchValue || '').trim()
+
+    if (!reset && (!this.data.hasMore || this.data.isLoading)) {
+      return
+    }
+
+    this.setData({
+      isLoading: true,
+      loadingText: '加载中...'
+    })
+
+    try {
+      const res = await getGoodsList({ limit, offset: nextOffset, query })
+      const list = res && Array.isArray(res.list) ? res.list : []
+      const merged = reset ? list : this.data.goodsList.concat(list)
+      const hasMore = res && typeof res.hasMore === 'boolean' ? res.hasMore : list.length === limit
+      const newOffset = nextOffset + list.length
+
+      this.setData({
+        goodsList: merged,
+        noticeList: buildNoticeList(merged),
+        hasMore,
+        offset: newOffset,
+        loadingText: hasMore ? '上拉加载更多' : '没有更多了',
+        isLoading: false,
+        isRefreshing: false
+      })
+    } catch (e) {
+      const msg = e && e.message ? String(e.message) : '加载失败'
+      this.setData({
+        isLoading: false,
+        isRefreshing: false,
+        loadingText: '加载失败'
+      })
+      wx.showToast({ title: msg, icon: 'none' })
+    }
   },
   onSearchInput(e) {
     this.setData({
@@ -39,70 +81,57 @@ Page({
   },
   onSearchConfirm() {
     const { searchValue } = this.data
-    if (!searchValue.trim()) {
-      wx.showToast({
-        title: '请输入搜索内容',
-        icon: 'none'
-      })
+    if (!String(searchValue || '').trim()) {
+      wx.showToast({ title: '请输入搜索内容', icon: 'none' })
       return
     }
-    wx.showToast({
-      title: `搜索：${searchValue}`,
-      icon: 'none'
-    })
+    this.setData({ offset: 0, hasMore: true })
+    this.loadHomeData({ reset: true })
   },
   onLoad() {
-    const goodsList = getGoodsList()
-    this.setData({
-      goodsList,
-      noticeList: buildNoticeList(goodsList)
-    })
+    this.setData({ offset: 0, hasMore: true })
+    this.loadHomeData({ reset: true })
+
+    const current = getCurrentUser()
+    if (!current && !getAuthSkipped()) {
+      wx.showModal({
+        title: '授权登录',
+        content: '首次进入需要授权获取昵称和头像，用于关联发布与参团记录。',
+        confirmText: '去授权',
+        cancelText: '暂不',
+        success: async (res) => {
+          if (!res.confirm) {
+            setAuthSkipped(true)
+            return
+          }
+          try {
+            await authorizeUser()
+            wx.showToast({ title: '授权成功', icon: 'success' })
+          } catch (e) {
+            const msg = e && e.errMsg ? String(e.errMsg) : '授权失败'
+            wx.showToast({ title: msg, icon: 'none' })
+          }
+        }
+      })
+    }
+  },
+  onShow() {
+    this.setData({ offset: 0, hasMore: true })
+    this.loadHomeData({ reset: true })
   },
   onRefresherRefresh() {
-    const goodsList = getGoodsList()
-    this.setData({
-      goodsList,
-      noticeList: buildNoticeList(goodsList),
-      loadingText: '上拉加载更多',
-      isRefreshing: false
-    })
+    this.setData({ offset: 0, hasMore: true, isRefreshing: true })
+    this.loadHomeData({ reset: true })
   },
   onReachBottom() {
-    if (this.data.isLoading) {
-      return
-    }
-    // Limit to 20 items
-    if (this.data.goodsList.length >= 20) {
-      this.setData({ loadingText: '没有更多了' })
-      return
-    }
-
-    this.setData({ isLoading: true, loadingText: '加载中...' })
-    const moreList = getGoodsList(10) // Load fewer items if needed, or just standard batch
-    
-    // Check if adding moreList exceeds 20
-    let nextList = this.data.goodsList.concat(moreList)
-    if (nextList.length > 20) {
-        nextList = nextList.slice(0, 20)
-    }
-
-    this.setData({
-      goodsList: nextList,
-      loadingText: nextList.length >= 20 ? '没有更多了' : '已为你加载更多',
-      isLoading: false
-    })
+    this.loadHomeData({ reset: false })
   },
-  handleGoodsTap(event) {
-    const id = event.currentTarget.dataset.id
-    // Use loose equality to handle potential string/number mismatch
-    const goods = this.data.goodsList.find((item) => item.id == id)
-    if (!goods) {
-      console.error('Goods not found:', id)
-      return
-    }
-    console.log('Navigating to:', goods.path)
+  handleBuyClick(e) {
+    const { item: goods } = e.detail
+    if (!goods) return
+
     wx.navigateTo({
-      url: goods.path,
+      url: `/pages/detail/detail?id=${goods.id}`,
       fail: (err) => {
         console.error('Navigation failed:', err)
         wx.showToast({

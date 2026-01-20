@@ -21,6 +21,24 @@ page {
   padding: 20rpx;
 }
 
+.share-section {
+  padding: 0 20rpx;
+}
+
+.share-btn {
+  width: 100%;
+  background: #fff;
+  color: #e02e24;
+  border: 1rpx solid #e02e24;
+  font-size: 30rpx;
+  border-radius: 18rpx;
+  padding: 18rpx 0;
+}
+
+.share-btn:active {
+  opacity: 0.9;
+}
+
 .detail-content {
   padding: 0 20rpx;
 }
@@ -40,6 +58,42 @@ page {
   border-radius: 18rpx;
   padding: 6rpx 16rpx;
   font-size: 22rpx;
+}
+
+.order-link-section {
+  margin-top: 20rpx;
+  background: #fff;
+  padding: 24rpx;
+  border-radius: 20rpx;
+}
+
+.order-link-title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 14rpx;
+}
+
+.order-link-text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.order-link-actions {
+  margin-top: 18rpx;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.order-link-btn {
+  padding: 14rpx 22rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid #e02e24;
+  color: #e02e24;
+  font-size: 26rpx;
+  background: #fff;
 }
 
 /* Related Section */

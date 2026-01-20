@@ -1,7 +1,6 @@
 <navigation-bar title="发布拼团" back="{{false}}" color="#000" background="#fff"></navigation-bar>
 
 <view class="publish-container">
-  <!-- Tabs -->
   <view class="tabs-header">
     <block wx:for="{{tabs}}" wx:key="*this">
       <view class="tab-item {{activeTab === index ? 'active' : ''}}" bindtap="onTabClick" data-index="{{index}}">
@@ -11,7 +10,6 @@
     </block>
   </view>
 
-  <!-- Tutorial & Tips -->
   <view class="tips-section">
     <view class="tutorial-link">
       <text>分享教程</text>
@@ -22,7 +20,6 @@
     </view>
   </view>
 
-  <!-- Upload Area -->
   <view class="upload-section" bindtap="onUploadImage">
     <block wx:if="{{uploadedImage}}">
       <image class="preview-image" src="{{uploadedImage}}" mode="aspectFit"></image>
@@ -36,7 +33,29 @@
     </block>
   </view>
 
-  <!-- Top Options -->
+  <view class="qr-result-section" wx:if="{{uploadedImage}}">
+    <view class="status-list">
+      <view class="status-row">
+        <text class="status-label">上传截图</text>
+        <text class="status-mark" wx:if="{{uploadedImage}}">✔</text>
+      </view>
+      <view class="status-row">
+        <text class="status-label">识别拼团信息</text>
+        <text class="status-mark" wx:if="{{recognizeState === 'success'}}">✔</text>
+        <text class="status-mark status-processing" wx:elif="{{recognizeState === 'processing'}}">…</text>
+        <text class="status-mark status-failed" wx:elif="{{recognizeState === 'failed' || recognizeState === 'duplicate'}}">!</text>
+      </view>
+      <view class="status-hint" wx:if="{{recognizeHint}}">{{recognizeHint}}</view>
+    </view>
+
+    <view class="qr-actions">
+      <view class="qr-action-btn" bindtap="onRecognizeQr">重新识别</view>
+      <view class="qr-action-btn" wx:if="{{orderLink === '' && qrStatus !== 'scanning'}}" bindtap="onRecognizeQrByScanCode">使用扫一扫</view>
+    </view>
+  </view>
+
+  <canvas canvas-id="qrCanvas" class="qr-canvas" style="width:{{canvasW}}px;height:{{canvasH}}px;" width="{{canvasW}}" height="{{canvasH}}"></canvas>
+
   <view class="options-section">
     <text class="options-label">置顶拼团</text>
     <view class="options-group">
@@ -51,14 +70,7 @@
     </view>
   </view>
 
-  <!-- Submit Button -->
   <view class="submit-btn-wrapper">
-    <button class="submit-btn" bindtap="onSubmit">发布拼团</button>
+    <button class="submit-btn" bindtap="onSubmit" disabled="{{!canSubmit}}">发布拼团</button>
   </view>
-
-  <!-- Floating Home Button -->
-  <!-- view class="fab-home" bindtap="onGoHome">
-    <text class="home-icon">⌂</text>
-    <text>拼团页</text>
-  </view -->
 </view>

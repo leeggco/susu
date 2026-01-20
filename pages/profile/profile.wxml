@@ -3,35 +3,41 @@
 <!-- User Info Section (Full Width) -->
 <view class="user-card">
   <view class="avatar-wrapper">
-    <image class="avatar" src="https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0" mode="aspectFill"></image>
+    <image class="avatar" src="{{(user && user.profile && user.profile.avatar_url) || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" mode="aspectFill"></image>
   </view>
   <view class="info-wrapper">
-    <view class="nickname">微信用户</view>
-    <view class="user-id">ID: 888888</view>
+    <view class="nickname">{{(user && user.profile && user.profile.nickname) || '未授权用户'}}</view>
+    <view class="user-id" wx:if="{{user && user.id}}">ID: {{user.id}}</view>
+    <button class="auth-btn" wx:if="{{!user}}" bindtap="onAuthorizeTap" loading="{{isLoading}}">去授权</button>
   </view>
 </view>
 
 <view class="profile-container">
-  <!-- Menu Section -->
-  <view class="menu-list">
-    <view class="menu-item">
-      <view class="menu-icon-wrapper" style="background: #e1f5fe;">
-        <text class="menu-icon">📄</text>
-      </view>
-      <view class="menu-content">
-        <text class="menu-title">发布的拼团</text>
-        <text class="menu-arrow">></text>
-      </view>
+  <view class="stats-card" wx:if="{{user}}">
+    <view class="stat-item">
+      <view class="stat-num">{{postsCount}}</view>
+      <view class="stat-label">发布</view>
     </view>
-    
-    <view class="menu-item">
-      <view class="menu-icon-wrapper" style="background: #fff3e0;">
-        <text class="menu-icon">📦</text>
-      </view>
-      <view class="menu-content">
-        <text class="menu-title">购买的订单</text>
-        <text class="menu-arrow">></text>
-      </view>
+    <view class="stat-split"></view>
+    <view class="stat-item">
+      <view class="stat-num">{{participationsCount}}</view>
+      <view class="stat-label">参团</view>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{user}}">
+    <view class="section-title">我发布的拼团</view>
+    <view wx:if="{{publishedList.length === 0}}" class="empty-text">暂无发布记录</view>
+    <view wx:else class="goods-list">
+      <goods-card wx:for="{{publishedList}}" wx:key="id" item="{{item}}" bind:buy="onGoodsTap"></goods-card>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{user}}">
+    <view class="section-title">我参与的拼团</view>
+    <view wx:if="{{participatedList.length === 0}}" class="empty-text">暂无参团记录</view>
+    <view wx:else class="goods-list">
+      <goods-card wx:for="{{participatedList}}" wx:key="id" item="{{item}}" bind:buy="onGoodsTap"></goods-card>
     </view>
   </view>
 </view>

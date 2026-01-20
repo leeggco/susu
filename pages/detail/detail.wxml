@@ -3,7 +3,11 @@
   <view class="detail-page" wx:if="{{goods}}">
     <!-- Use goods-card to display current group info consistent with list -->
     <view class="goods-card-wrapper">
-      <goods-card item="{{goods}}"></goods-card>
+      <goods-card item="{{goods}}" bind:buy="handleBuyClick"></goods-card>
+    </view>
+
+    <view class="share-section">
+      <button class="share-btn" open-type="share">分享给微信好友</button>
     </view>
     
     <view class="detail-content">
@@ -11,6 +15,14 @@
         <view class="benefit-item">拼团满2人立减</view>
         <view class="benefit-item">平台补贴频道专享</view>
         <view class="benefit-item">7天无忧退换</view>
+      </view>
+
+      <view class="order-link-section" wx:if="{{goods.order_link}}">
+        <view class="order-link-title">下单链接</view>
+        <view class="order-link-text">{{goods.order_link}}</view>
+        <view class="order-link-actions">
+          <view class="order-link-btn" bindtap="onCopyOrderLink">复制链接</view>
+        </view>
       </view>
     </view>
 
@@ -24,7 +36,7 @@
       
       <view class="related-list">
         <block wx:for="{{relatedGoods}}" wx:key="id">
-          <goods-card item="{{item}}"></goods-card>
+          <goods-card item="{{item}}" bind:buy="handleBuyClick"></goods-card>
         </block>
       </view>
     </view>

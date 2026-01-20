@@ -1,9 +1,10 @@
-<view class="goods-card">
+<view class="goods-card" bindtap="onCtaTap">
   <view class="card-body">
     <view class="thumb-wrap">
       <image class="thumb" src="{{item.image}}" mode="aspectFill"></image>
       <view class="tag-platform" wx:if="{{item.platform}}">{{item.platform}}</view>
       <view class="tag-group-size">{{groupSize}}人团</view>
+      <view class="tag-subsidy" wx:if="{{item.sales_tip === '百亿补贴'}}">百亿补贴</view>
     </view>
     <view class="info">
       <view class="title-row">

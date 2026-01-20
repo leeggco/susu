@@ -4,6 +4,12 @@
   overflow: hidden;
   box-shadow: 0 10rpx 26rpx rgba(0, 0, 0, 0.04);
   padding: 24rpx 24rpx 20rpx;
+  transition: all 0.2s ease;
+}
+
+.goods-card:active {
+  background-color: #f5f5f5;
+  transform: scale(0.98);
 }
 
 .card-header {
@@ -117,6 +123,18 @@
   font-size: 20rpx;
   padding: 4rpx 8rpx;
   border-bottom-left-radius: 8rpx;
+  z-index: 10;
+}
+
+.tag-subsidy {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  background: #ff9f4f;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 4rpx 8rpx;
+  border-top-right-radius: 8rpx;
   z-index: 10;
 }
 

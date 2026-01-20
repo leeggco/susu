@@ -17,8 +17,8 @@
     <urgent-bar messages="{{noticeList}}"></urgent-bar>
     <view class="goods-grid">
       <block wx:for="{{goodsList}}" wx:key="id">
-        <view class="goods-item" data-id="{{item.id}}" bindtap="handleGoodsTap">
-          <goods-card item="{{item}}"></goods-card>
+        <view class="goods-item">
+          <goods-card item="{{item}}" bind:buy="handleBuyClick"></goods-card>
         </view>
       </block>
     </view>

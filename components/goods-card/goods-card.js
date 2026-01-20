@@ -24,7 +24,7 @@ Component({
     setupData(item) {
       const savePrice = (item.original_price - item.price).toFixed(1)
       const groupSize = item.group_size || 3
-      const remainCount = Math.max(1, groupSize - (item.joined_count || 0))
+      const remainCount = Math.max(0, groupSize - (item.joined_count || 0))
       
       this.setData({
         savePrice,
@@ -35,6 +35,10 @@ Component({
       if (item.end_time) {
         this.startTimer(item.end_time)
       }
+    },
+    
+    onCtaTap() {
+      this.triggerEvent('buy', { item: this.properties.item })
     },
     
     startTimer(endTime) {

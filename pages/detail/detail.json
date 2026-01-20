@@ -3,5 +3,6 @@
     "goods-card": "/components/goods-card/goods-card",
     "navigation-bar": "/components/navigation-bar/navigation-bar"
   },
+  "enableShareAppMessage": true,
   "navigationBarTitleText": "拼团详情"
 }

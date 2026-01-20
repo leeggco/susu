@@ -35,6 +35,9 @@
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
   },
+  "navigateToMiniProgramAppIdList": [
+    "wx32540bd863b27570"
+  ],
   "style": "v2",
   "renderer": "skyline",
   "rendererOptions": {
