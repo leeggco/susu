@@ -1,4 +1,4 @@
-const { getGoodsList, getAuthSkipped, setAuthSkipped, authorizeUser, getCurrentUser } = require('../../utils/request')
+const { getGoodsList } = require('../../utils/request')
 
 const noticeNames = [
   '小雨',
@@ -35,11 +35,15 @@ Page({
     offset: 0
   },
   async loadHomeData({ reset = false } = {}) {
-    const limit = 20
+    const limit = 10
     const nextOffset = reset ? 0 : Number(this.data.offset) || 0
     const query = String(this.data.searchValue || '').trim()
 
-    if (!reset && (!this.data.hasMore || this.data.isLoading)) {
+    if (this.data.isLoading) {
+      return
+    }
+
+    if (!reset && !this.data.hasMore) {
       return
     }
 
@@ -96,33 +100,13 @@ Page({
   onLoad() {
     this.setData({ offset: 0, hasMore: true })
     this.loadHomeData({ reset: true })
-
-    const current = getCurrentUser()
-    if (!current && !getAuthSkipped()) {
-      wx.showModal({
-        title: '授权登录',
-        content: '首次进入需要授权获取昵称和头像，用于关联发布与参团记录。',
-        confirmText: '去授权',
-        cancelText: '暂不',
-        success: async (res) => {
-          if (!res.confirm) {
-            setAuthSkipped(true)
-            return
-          }
-          try {
-            await authorizeUser()
-            wx.showToast({ title: '授权成功', icon: 'success' })
-          } catch (e) {
-            const msg = e && e.errMsg ? String(e.errMsg) : '授权失败'
-            wx.showToast({ title: msg, icon: 'none' })
-          }
-        }
-      })
-    }
   },
   onShow() {
-    this.setData({ offset: 0, hasMore: true })
-    this.loadHomeData({ reset: true })
+    if (this.data.isLoading) return
+    if (!Array.isArray(this.data.goodsList) || this.data.goodsList.length === 0) {
+      this.setData({ offset: 0, hasMore: true })
+      this.loadHomeData({ reset: true })
+    }
   },
   onRefresherRefresh() {
     this.setData({ offset: 0, hasMore: true, isRefreshing: true })

@@ -37,11 +37,11 @@
     <view class="status-list">
       <view class="status-row">
         <text class="status-label">上传图片</text>
-        <text class="status-mark" wx:if="{{uploadedImage}}">✔</text>
+        <text class="status-mark" wx:if="{{uploadedImage}}"><icon class="icon-box-img" type="success" size="24"></icon></text>
       </view>
       <view class="status-row">
         <text class="status-label">识别拼团信息</text>
-        <text class="status-mark" wx:if="{{recognizeState === 'success'}}">✔</text>
+        <text class="status-mark" wx:if="{{recognizeState === 'success'}}"><icon class="icon-box-img" type="success" size="24"></icon></text>
         <text class="status-mark status-processing" wx:elif="{{recognizeState === 'processing'}}">…</text>
         <text class="status-mark status-failed" wx:elif="{{recognizeState === 'failed' || recognizeState === 'duplicate'}}">!</text>
       </view>

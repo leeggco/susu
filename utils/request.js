@@ -58,6 +58,13 @@ const buildAuthHeaders = () => {
 
 const randomId = () => `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
 
+const generateRandomUserNickname = () => {
+  const n = Math.floor(Math.random() * 1000000)
+    .toString()
+    .padStart(6, '0')
+  return `用户${n}`
+}
+
 const getClientId = () => {
   try {
     const cached = wx.getStorageSync(storageKeys.clientId)
@@ -105,6 +112,29 @@ const getAuthSkipped = () => {
   }
 }
 
+const clearCurrentUserCache = () => {
+  try {
+    if (wx.removeStorageSync) {
+      wx.removeStorageSync(storageKeys.userId)
+      wx.removeStorageSync(storageKeys.userProfile)
+    } else {
+      wx.setStorageSync(storageKeys.userId, '')
+      wx.setStorageSync(storageKeys.userProfile, '')
+    }
+  } catch (e) {}
+}
+
+const checkUserExistsById = async (userId) => {
+  const { supabaseUrl } = getConfig()
+  if (!supabaseUrl) throw new Error('missing_supabase_url')
+  const id = String(userId || '').trim()
+  if (!id) return false
+  const url = `${supabaseUrl}/rest/v1/users?id=eq.${encodeURIComponent(id)}&select=${encodeURIComponent('id')}&limit=1`
+  const res = await requestJson(url, { method: 'GET', headers: buildAuthHeaders() })
+  const row = Array.isArray(res.data) ? res.data[0] : null
+  return Boolean(row && row.id)
+}
+
 const upsertUser = async (wxProfile) => {
   const { supabaseUrl } = getConfig()
   if (!supabaseUrl) throw new Error('missing_supabase_url')
@@ -115,7 +145,7 @@ const upsertUser = async (wxProfile) => {
   
   const body = {
     client_id: clientId,
-    nickname: userInfo.nickName ? String(userInfo.nickName) : null,
+    nickname: generateRandomUserNickname(),
     avatar_url: userInfo.avatarUrl ? String(userInfo.avatarUrl) : DEFAULT_AVATAR_URL,
     gender: typeof userInfo.gender === 'number' ? userInfo.gender : null,
     country: userInfo.country ? String(userInfo.country) : null,
@@ -170,7 +200,13 @@ const authorizeUser = async () => {
 
 const ensureUser = async ({ interactive = false } = {}) => {
   const current = getCurrentUser()
-  if (current) return current
+  if (current) {
+    const exists = await checkUserExistsById(current.id).catch(() => false)
+    if (exists) return current
+    clearCurrentUserCache()
+    if (!interactive) throw new Error('need_authorization')
+    return authorizeUser()
+  }
   if (!interactive) throw new Error('need_authorization')
   return authorizeUser()
 }

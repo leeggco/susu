@@ -137,7 +137,7 @@ Page({
       recognizeHint = '该拼团已发布，建议直接参与，成团更快'
     } else if (qrOk && ocrOk) {
       recognizeState = 'success'
-      recognizeHint = '上传图片✔，识别拼团信息✔'
+      recognizeHint = '已完成，可发布。'
     } else if (uploadedOk && !qrOk && !ocrOk && this.data.qrStatus === 'idle' && !this.data.fetchErrorText) {
       recognizeState = 'processing'
       recognizeHint = '正在识别拼团信息...'
@@ -321,7 +321,7 @@ Page({
       qrStatusText: '正在识别二维码…'
     })
     this.updateRecognizeState()
-    wx.showLoading({ title: '识别中...' })
+    wx.showLoading({ title: '拼团识别中...' })
     try {
       const link = await this.decodeQrFromImage(this.data.uploadedImage)
       wx.hideLoading()
@@ -342,7 +342,7 @@ Page({
       })
       this.updateRecognizeState()
       this.checkDuplicateIfNeeded()
-      wx.showToast({ title: '识别成功', icon: 'success' })
+      wx.showToast({ title: '拼团识别成功', icon: 'success' })
     } catch (e) {
       wx.hideLoading()
       this.setData({
