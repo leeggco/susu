@@ -63,7 +63,7 @@ Page({
       if (msg === 'need_authorization') {
         wx.showModal({
           title: '需要授权',
-          content: '查看我的发布记录需要授权登录。',
+          content: '查看我的提交记录需要授权登录。',
           confirmText: '去授权',
           cancelText: '返回',
           success: async (res) => {
@@ -93,7 +93,21 @@ Page({
   onGoodsTap(e) {
     const goods = e && e.detail && e.detail.item ? e.detail.item : null
     if (!goods || !goods.id) return
-    wx.navigateTo({ url: `/pages/detail/detail?id=${goods.id}` })
+    if (goods.approved_post_id) {
+      wx.navigateTo({ url: `/pages/detail/detail?id=${goods.approved_post_id}` })
+      return
+    }
+    const status = goods.status ? String(goods.status) : 'pending'
+    const title = status === 'rejected' ? '未通过' : status === 'approved' ? '已通过' : '审核中'
+    const content =
+      status === 'rejected'
+        ? goods.reject_reason
+          ? `原因：${goods.reject_reason}`
+          : '未通过审核'
+        : status === 'approved'
+          ? '已通过审核，稍后会展示在首页。'
+          : '已提交，正在审核中。'
+    wx.showModal({ title, content, showCancel: false })
   }
 })
 

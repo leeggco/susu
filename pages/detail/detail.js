@@ -120,6 +120,9 @@ Page({
   onUnload() {
     this.stopHeroTimer()
   },
+  onBackHome() {
+    wx.switchTab({ url: '/pages/index/index' })
+  },
 
   setupHero(goods) {
     const groupSize = goods && goods.group_size ? Number(goods.group_size) : 3

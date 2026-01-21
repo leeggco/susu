@@ -7,7 +7,10 @@
     </view>
 
     <view class="share-section">
-      <button class="share-btn" open-type="share">分享给微信好友</button>
+      <view class="share-row">
+        <view class="back-home-link" bindtap="onBackHome">返回首页</view>
+        <button class="share-btn" open-type="share">分享给微信好友</button>
+      </view>
     </view>
 
 

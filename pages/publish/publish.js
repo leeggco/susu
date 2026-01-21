@@ -137,7 +137,7 @@ Page({
       recognizeHint = '该拼团已发布，建议直接参与，成团更快'
     } else if (qrOk && ocrOk) {
       recognizeState = 'success'
-      recognizeHint = '已完成，可发布。'
+      recognizeHint = '已完成，可提交审核。'
     } else if (uploadedOk && !qrOk && !ocrOk && this.data.qrStatus === 'idle' && !this.data.fetchErrorText) {
       recognizeState = 'processing'
       recognizeHint = '正在识别拼团信息...'
@@ -169,19 +169,19 @@ Page({
 
         if (this.data.duplicatePromptedOrderLink !== link) {
           this.setData({ duplicatePromptedOrderLink: link })
-        const snapshot = this.getFormStateSnapshot()
+          const snapshot = this.getFormStateSnapshot()
           wx.showModal({
             title: '重复拼团',
             content: '该拼团已有人发布，建议直接参与，成团更快。',
             confirmText: '去查看',
             cancelText: '我知道了',
             success: (res) => {
-            this.setData(snapshot, () => {
-              this.updateRecognizeState()
-              if (res.confirm) {
-                wx.navigateTo({ url: `/pages/detail/detail?id=${dup.id}` })
-              }
-            })
+              this.setData(snapshot, () => {
+                this.updateRecognizeState()
+                if (res.confirm) {
+                  wx.navigateTo({ url: `/pages/detail/detail?id=${dup.id}` })
+                }
+              })
             }
           })
         }
@@ -443,7 +443,7 @@ Page({
   },
 
   async onSubmit() {
-    const { addPublishedGoods, findDuplicateGroupPost, uploadCoverImage } = require('../../utils/request')
+    const { submitGroupPost, findDuplicateGroupPost, uploadCoverImage } = require('../../utils/request')
 
     if (!this.data.uploadedImage) {
       wx.showToast({
@@ -464,11 +464,11 @@ Page({
       return
     }
     if (!this.data.canSubmit) {
-      wx.showToast({ title: this.data.recognizeHint || '暂不可发布', icon: 'none' })
+      wx.showToast({ title: this.data.recognizeHint || '暂不可提交', icon: 'none' })
       return
     }
     
-    wx.showLoading({ title: '发布中...' })
+    wx.showLoading({ title: '提交中...' })
 
     const now = Date.now()
     const topHours = Number(this.data.selectedTopOption) || 0
@@ -529,8 +529,8 @@ Page({
         return
       }
 
-      const created = await addPublishedGoods({
-        title: this.data.fetchedTitle || '【3人团】新发布拼团...',
+      await submitGroupPost({
+        title: this.data.fetchedTitle || '【3人团】新提交拼团...',
         image: coverUrl,
         platform,
         order_link: link,
@@ -550,15 +550,13 @@ Page({
 
       wx.hideLoading()
       this.resetForm()
-      wx.showToast({ title: '发布成功', icon: 'success' })
-      if (created && created.id) {
-        setTimeout(() => {
-          wx.navigateTo({ url: `/pages/detail/detail?id=${created.id}` })
-        }, 500)
-      }
+      wx.showToast({ title: '提交成功，待审核', icon: 'success' })
+      setTimeout(() => {
+        wx.switchTab({ url: '/pages/index/index' })
+      }, 500)
     } catch (e) {
       wx.hideLoading()
-      const msg = e && e.message ? String(e.message) : '发布失败'
+      const msg = e && e.message ? String(e.message) : '提交失败'
       wx.showToast({ title: msg, icon: 'none' })
     }
   },

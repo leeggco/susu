@@ -15,7 +15,7 @@
       <view class="search-clear" wx:if="{{searchValue}}" bindtap="onClearSearch">×</view>
       <view class="search-tag" bindtap="onSearchConfirm">搜索</view>
     </view>
-    <urgent-bar messages="{{noticeList}}"></urgent-bar>
+    <!--urgent-bar messages="{{noticeList}}"></urgent-bar-->
     <view class="goods-grid">
       <block wx:for="{{goodsList}}" wx:key="id">
         <view class="goods-item">

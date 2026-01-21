@@ -13,7 +13,8 @@ const storageKeys = {
   clientId: 'sb_client_id_v1',
   userId: 'sb_user_id_v1',
   userProfile: 'sb_user_profile_v1',
-  authSkipped: 'sb_auth_skipped_v1'
+  authSkipped: 'sb_auth_skipped_v1',
+  wechatOpenId: 'sb_wechat_openid_v1'
 }
 
 const DEFAULT_AVATAR_URL =
@@ -49,8 +50,10 @@ const requestJson = (url, { method = 'GET', headers = {}, data = undefined } = {
 
 const buildAuthHeaders = () => {
   const { supabaseAnonKey } = getConfig()
-  if (!supabaseAnonKey) return {}
+  const clientId = getClientId()
+  if (!supabaseAnonKey) return { 'x-client-id': clientId }
   return {
+    'x-client-id': clientId,
     apikey: supabaseAnonKey,
     Authorization: `Bearer ${supabaseAnonKey}`
   }
@@ -75,6 +78,64 @@ const getClientId = () => {
     wx.setStorageSync(storageKeys.clientId, id)
   } catch (e) {}
   return id
+}
+
+const getCachedWeChatOpenId = () => {
+  try {
+    const cached = wx.getStorageSync(storageKeys.wechatOpenId)
+    return cached ? String(cached) : ''
+  } catch (e) {
+    return ''
+  }
+}
+
+const setCachedWeChatOpenId = (openid) => {
+  try {
+    wx.setStorageSync(storageKeys.wechatOpenId, String(openid || ''))
+  } catch (e) {}
+}
+
+const wxLogin = () =>
+  new Promise((resolve, reject) => {
+    if (!wx.login) {
+      reject(new Error('wx_login_not_supported'))
+      return
+    }
+    wx.login({
+      timeout: 8000,
+      success: (res) => resolve(res),
+      fail: (err) => reject(err)
+    })
+  })
+
+const fetchWeChatOpenId = async () => {
+  const cached = getCachedWeChatOpenId()
+  if (cached) return cached
+
+  const { supabaseFunctionsBaseUrl, supabaseScrapeKey } = getConfig()
+  if (!supabaseFunctionsBaseUrl) throw new Error('missing_supabase_functions_base_url')
+
+  const loginRes = await wxLogin()
+  const code = loginRes && loginRes.code ? String(loginRes.code).trim() : ''
+  if (!code) throw new Error('missing_wechat_code')
+
+  const url = `${supabaseFunctionsBaseUrl}/wechat-login`
+  const headers = {
+    ...buildAuthHeaders()
+  }
+  if (supabaseScrapeKey) {
+    headers['x-scrape-key'] = supabaseScrapeKey
+  }
+
+  const res = await requestJson(url, {
+    method: 'POST',
+    headers,
+    data: { code }
+  })
+  const openid = res && res.data && res.data.ok === true && res.data.openid ? String(res.data.openid) : ''
+  if (!openid) throw new Error('missing_openid')
+  setCachedWeChatOpenId(openid)
+  return openid
 }
 
 const getCurrentUser = () => {
@@ -135,16 +196,36 @@ const checkUserExistsById = async (userId) => {
   return Boolean(row && row.id)
 }
 
+const bindWeChatOpenIdToClientId = async ({ openid, clientId } = {}) => {
+  const { supabaseUrl } = getConfig()
+  if (!supabaseUrl) throw new Error('missing_supabase_url')
+  const o = String(openid || '').trim()
+  const c = String(clientId || '').trim()
+  if (!o || !c) return
+  const url = `${supabaseUrl}/rest/v1/users?client_id=eq.${encodeURIComponent(c)}&wechat_openid=is.null&select=${encodeURIComponent(
+    'id'
+  )}`
+  await requestJson(url, {
+    method: 'PATCH',
+    headers: {
+      ...buildAuthHeaders(),
+      Prefer: 'return=representation'
+    },
+    data: { wechat_openid: o }
+  }).catch(() => null)
+}
+
 const upsertUser = async (wxProfile) => {
   const { supabaseUrl } = getConfig()
   if (!supabaseUrl) throw new Error('missing_supabase_url')
 
   const clientId = getClientId()
+  const openid = await fetchWeChatOpenId().catch(() => '')
   const userInfo = wxProfile && wxProfile.userInfo ? wxProfile.userInfo : {}
-  console.log('[Auth] wx.getUserProfile result:', wxProfile)
-  
+
   const body = {
     client_id: clientId,
+    wechat_openid: openid ? openid : undefined,
     nickname: generateRandomUserNickname(),
     avatar_url: userInfo.avatarUrl ? String(userInfo.avatarUrl) : DEFAULT_AVATAR_URL,
     gender: typeof userInfo.gender === 'number' ? userInfo.gender : null,
@@ -155,9 +236,13 @@ const upsertUser = async (wxProfile) => {
     last_seen_at: new Date().toISOString()
   }
 
-  console.log('[Auth] Upserting user to Supabase:', body)
+  if (openid) {
+    await bindWeChatOpenIdToClientId({ openid, clientId })
+  }
 
-  const url = `${supabaseUrl}/rest/v1/users?on_conflict=client_id&select=*`
+  const url = `${supabaseUrl}/rest/v1/users?on_conflict=${encodeURIComponent(
+    openid ? 'wechat_openid' : 'client_id'
+  )}&select=*`
   const res = await requestJson(url, {
     method: 'POST',
     headers: {
@@ -166,8 +251,6 @@ const upsertUser = async (wxProfile) => {
     },
     data: body
   })
-  
-  console.log('[Auth] Supabase response:', res.data)
   const row = Array.isArray(res.data) ? res.data[0] : null
   if (!row || !row.id) throw new Error('user_upsert_failed')
 
@@ -257,18 +340,20 @@ const normalizeGoods = (row) => {
     order_link: row.order_link || '',
     top_until: row.top_until ? new Date(row.top_until).getTime() : 0,
     published_at: row.published_at ? new Date(row.published_at).getTime() : Date.now(),
-    creator_user_id: row.creator_user_id || ''
+    creator_user_id: row.creator_user_id || '',
+    status: row.status ? String(row.status) : 'active'
   }
 }
 
 const groupPostSelect =
-  'id,platform,order_link,title,cover_image_url,price,original_price,sales_tip,group_size,joined_count,end_time,top_until,published_at,creator_user_id'
+  'id,platform,order_link,title,cover_image_url,price,original_price,sales_tip,group_size,joined_count,end_time,top_until,published_at,creator_user_id,status'
 
 const getGoodsList = async ({ limit = 20, offset = 0, query = '' } = {}) => {
   const { supabaseUrl } = getConfig()
   if (!supabaseUrl) throw new Error('missing_supabase_url')
 
   let url = `${supabaseUrl}/rest/v1/group_posts?select=${encodeURIComponent(groupPostSelect)}`
+  url += `&status=eq.${encodeURIComponent('active')}`
   url += `&order=${encodeURIComponent('top_until.desc.nullslast,published_at.desc')}`
   url += `&limit=${encodeURIComponent(String(limit))}&offset=${encodeURIComponent(String(offset))}`
 
@@ -325,7 +410,9 @@ const getRelatedGoods = async ({ platform, excludeId, limit = 4 } = {}) => {
   const { supabaseUrl } = getConfig()
   if (!supabaseUrl) throw new Error('missing_supabase_url')
 
-  let url = `${supabaseUrl}/rest/v1/group_posts?select=${encodeURIComponent(groupPostSelect)}&order=${encodeURIComponent('published_at.desc')}`
+  let url = `${supabaseUrl}/rest/v1/group_posts?select=${encodeURIComponent(groupPostSelect)}`
+  url += `&status=eq.${encodeURIComponent('active')}`
+  url += `&order=${encodeURIComponent('published_at.desc')}`
   url += `&limit=${encodeURIComponent(String(limit))}`
   if (platform) {
     url += `&platform=eq.${encodeURIComponent(String(platform))}`
@@ -337,13 +424,49 @@ const getRelatedGoods = async ({ platform, excludeId, limit = 4 } = {}) => {
   return Array.isArray(res.data) ? res.data.map(normalizeGoods).filter(Boolean) : []
 }
 
-const addPublishedGoods = async (payload) => {
+const normalizeSubmission = (row) => {
+  if (!row) return null
+  const id = row.id
+  const title = row.title || '【3人团】新提交拼团...'
+  const image = row.cover_image_url || ''
+  const price = typeof row.price === 'number' ? row.price : 19.8
+  const originalPrice = typeof row.original_price === 'number' ? row.original_price : 29.9
+  const groupSize = typeof row.group_size === 'number' ? row.group_size : 3
+  const joinedCount = typeof row.joined_count === 'number' ? row.joined_count : 0
+  const endTime = row.end_time ? new Date(row.end_time).getTime() : null
+  const platformText = enumToPlatformText(row.platform)
+  const createdAt = row.created_at ? new Date(row.created_at).getTime() : Date.now()
+
+  return {
+    id,
+    title,
+    image,
+    price,
+    original_price: originalPrice,
+    sales_tip: row.sales_tip || '待审核',
+    group_size: groupSize,
+    joined_count: joinedCount,
+    end_time: endTime,
+    platform: platformText,
+    order_link: row.order_link || '',
+    top_until: row.top_until ? new Date(row.top_until).getTime() : 0,
+    published_at: createdAt,
+    creator_user_id: row.user_id || '',
+    status: row.status ? String(row.status) : 'pending',
+    reject_reason: row.reject_reason ? String(row.reject_reason) : '',
+    approved_post_id: row.approved_post_id ? String(row.approved_post_id) : ''
+  }
+}
+
+const submitGroupPost = async (payload) => {
   const { supabaseUrl } = getConfig()
   if (!supabaseUrl) throw new Error('missing_supabase_url')
 
   const user = await ensureUser({ interactive: true })
   const meta = payload && payload.metadata && typeof payload.metadata === 'object' ? payload.metadata : null
   const body = {
+    client_id: getClientId(),
+    user_id: user.id,
     platform: platformToEnum(payload.platform),
     order_link: String(payload.order_link || '').trim(),
     title: payload.title ? String(payload.title) : null,
@@ -356,11 +479,10 @@ const addPublishedGoods = async (payload) => {
     end_time: payload.end_time ? new Date(payload.end_time).toISOString() : null,
     top_until: payload.top_until ? new Date(payload.top_until).toISOString() : null,
     metadata: meta ? meta : undefined,
-    published_at: new Date().toISOString(),
-    creator_user_id: user.id
+    status: 'pending'
   }
 
-  const url = `${supabaseUrl}/rest/v1/group_posts?select=*`
+  const url = `${supabaseUrl}/rest/v1/group_post_submissions?select=*`
   const res = await requestJson(url, {
     method: 'POST',
     headers: {
@@ -370,7 +492,7 @@ const addPublishedGoods = async (payload) => {
     data: body
   })
   const row = Array.isArray(res.data) ? res.data[0] : null
-  return normalizeGoods(row)
+  return normalizeSubmission(row)
 }
 
 const addParticipation = async ({ postId, action = 'click_buy' }) => {
@@ -399,7 +521,7 @@ const getUserStats = async () => {
   if (!supabaseUrl) throw new Error('missing_supabase_url')
   const user = await ensureUser({ interactive: false })
 
-  const postsUrl = `${supabaseUrl}/rest/v1/group_posts?select=id&creator_user_id=eq.${encodeURIComponent(user.id)}&limit=1`
+  const postsUrl = `${supabaseUrl}/rest/v1/group_post_submissions?select=id&user_id=eq.${encodeURIComponent(user.id)}&limit=1`
   const partsUrl = `${supabaseUrl}/rest/v1/group_post_participants?select=id&user_id=eq.${encodeURIComponent(user.id)}&limit=1`
 
   const [postsRes, partsRes] = await Promise.all([
@@ -426,9 +548,11 @@ const getMyPublishedGoods = async ({ limit = 10, offset = 0 } = {}) => {
   if (!supabaseUrl) throw new Error('missing_supabase_url')
   const user = await ensureUser({ interactive: false })
 
-  let url = `${supabaseUrl}/rest/v1/group_posts?select=${encodeURIComponent(groupPostSelect)}`
-  url += `&creator_user_id=eq.${encodeURIComponent(String(user.id))}`
-  url += `&order=${encodeURIComponent('published_at.desc')}`
+  const select =
+    'id,platform,order_link,title,cover_image_url,price,original_price,sales_tip,group_size,joined_count,end_time,top_until,metadata,status,reject_reason,approved_post_id,created_at,user_id'
+  let url = `${supabaseUrl}/rest/v1/group_post_submissions?select=${encodeURIComponent(select)}`
+  url += `&user_id=eq.${encodeURIComponent(String(user.id))}`
+  url += `&order=${encodeURIComponent('created_at.desc')}`
   url += `&limit=${encodeURIComponent(String(limit))}&offset=${encodeURIComponent(String(offset))}`
 
   const res = await requestJson(url, {
@@ -439,7 +563,7 @@ const getMyPublishedGoods = async ({ limit = 10, offset = 0 } = {}) => {
     }
   })
 
-  const list = Array.isArray(res.data) ? res.data.map(normalizeGoods).filter(Boolean) : []
+  const list = Array.isArray(res.data) ? res.data.map(normalizeSubmission).filter(Boolean) : []
   const total = Number(
     res.header && (res.header['content-range'] || res.header['Content-Range'])
       ? String(res.header['content-range'] || res.header['Content-Range']).split('/')[1]
@@ -587,7 +711,8 @@ module.exports = {
   findDuplicateGroupPost,
   getGoodsById,
   getRelatedGoods,
-  addPublishedGoods,
+  submitGroupPost,
+  addPublishedGoods: submitGroupPost,
   addParticipation,
   ocrScreenshot,
   uploadCoverImage

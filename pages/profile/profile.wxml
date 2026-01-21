@@ -16,7 +16,7 @@
   <view class="stats-card" wx:if="{{user}}">
     <view class="stat-item" bindtap="navToMyPublished">
       <view class="stat-num">{{postsCount}}</view>
-      <view class="stat-label">发布</view>
+      <view class="stat-label">提交</view>
     </view>
     <view class="stat-split"></view>
     <view class="stat-item" bindtap="navToMyParticipated">

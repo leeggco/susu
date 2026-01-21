@@ -21,7 +21,7 @@
       },
       {
         "pagePath": "pages/publish/publish",
-        "text": "发布",
+        "text": "提交",
         "iconPath": "assets/tabbar/publish.png",
         "selectedIconPath": "assets/tabbar/publish-active.png"
       },

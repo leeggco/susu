@@ -25,8 +25,29 @@ page {
   padding: 0 20rpx;
 }
 
+.share-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.back-home-link {
+  flex-shrink: 0;
+  background: #fff;
+  color: #e02e24;
+  border: 1rpx solid #e02e24;
+  font-size: 28rpx;
+  border-radius: 18rpx;
+  padding: 18rpx 24rpx;
+  line-height: 1;
+}
+
+.back-home-link:active {
+  opacity: 0.9;
+}
+
 .share-btn {
-  width: 100%;
+  flex: 1;
   background: #fff;
   color: #e02e24;
   border: 1rpx solid #e02e24;

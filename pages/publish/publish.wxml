@@ -1,4 +1,4 @@
-<navigation-bar title="发布拼团" back="{{false}}" color="#000" background="#fff"></navigation-bar>
+<navigation-bar title="提交线索" back="{{false}}" color="#000" background="#fff"></navigation-bar>
 
 <view class="publish-container">
   <view class="tabs-header">
@@ -16,7 +16,7 @@
       <view class="help-icon">?</view>
     </view>
     <view class="tip-content">
-      先在首页搜索已发布团，如果可以以直接拼，无需再发布，成团速度更快！
+      先在首页搜索已发布团，可直接参与现有拼团。
     </view>
   </view>
 
@@ -28,7 +28,7 @@
     <block wx:else>
       <view class="upload-placeholder">
         <text class="plus-icon">+</text>
-        <text class="upload-text">上传拼团图片</text>
+        <text class="upload-text">提交拼团线索</text>
       </view>
     </block>
   </view>
@@ -71,6 +71,6 @@
   </view-->
 
   <view class="submit-btn-wrapper">
-    <button class="submit-btn" bindtap="onSubmit" disabled="{{!canSubmit}}">发布拼团</button>
+    <button class="submit-btn" bindtap="onSubmit" disabled="{{!canSubmit}}">提交审核</button>
   </view>
 </view>
