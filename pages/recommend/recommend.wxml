@@ -1,0 +1,53 @@
+<navigation-bar title="精选" back="{{false}}" home="{{false}}"></navigation-bar>
+
+<view class="container">
+  <scroll-view 
+    class="scroll-area" 
+    scroll-y 
+    type="list"
+    bindscrolltolower="onReachBottom"
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onPullDownRefresh"
+  >
+    <view class="scroll-content">
+      <!-- Loading State -->
+      <view wx:if="{{loading && goodsList.length === 0}}" class="loading-state">
+        <view class="loading-spinner"></view>
+        <text>正在为您挑选好货...</text>
+      </view>
+
+      <!-- Goods Grid -->
+      <view class="goods-grid" wx:else>
+        <view class="goods-item" wx:for="{{goodsList}}" wx:key="goods_sign" bindtap="onTapGoods" data-item="{{item}}">
+          <image class="goods-img" src="{{item.image}}" mode="aspectFill" lazy-load></image>
+          <view class="goods-info">
+            <view class="goods-title">{{item.title}}</view>
+            <view class="goods-tags">
+              <text class="tag-coupon" wx:if="{{item.coupon_discount > 0}}">券¥{{item.coupon_discount}}</text>
+              <text class="tag-sales">{{item.sales_tip}}</text>
+            </view>
+            <view class="goods-price-row">
+              <view class="price-wrap">
+                <text class="symbol">¥</text>
+                <text class="price">{{item.price}}</text>
+              </view>
+              <text class="original-price">¥{{item.original_price}}</text>
+            </view>
+            <view class="buy-btn">抢购</view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Empty/Error State -->
+      <view wx:if="{{!loading && goodsList.length === 0}}" class="empty-state">
+        <text>暂无推荐商品，稍后再来吧</text>
+      </view>
+
+      <!-- Load More Spinner -->
+      <view wx:if="{{loading && goodsList.length > 0}}" class="load-more">
+        <text>加载中...</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/recommend/recommend",
     "pages/publish/publish",
     "pages/profile/profile",
     "pages/detail/detail",
@@ -16,6 +17,12 @@
       {
         "pagePath": "pages/index/index",
         "text": "拼团",
+        "iconPath": "assets/tabbar/home.png",
+        "selectedIconPath": "assets/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/recommend/recommend",
+        "text": "精选",
         "iconPath": "assets/tabbar/home.png",
         "selectedIconPath": "assets/tabbar/home-active.png"
       },

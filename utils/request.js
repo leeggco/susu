@@ -36,15 +36,18 @@ const requestJson = (url, { method = 'GET', headers = {}, data = undefined } = {
           resolve(res)
           return
         }
+        const data = res.data || {}
         const msg =
-          res && res.data && typeof res.data === 'object' && res.data.message
-            ? String(res.data.message)
-            : res && res.data
-              ? String(res.data)
-              : `http_${code}`
-        reject(new Error(msg))
+          data.message || 
+          data.error || 
+          (typeof data === 'string' ? data : `http_${code}`)
+        
+        reject(new Error(String(msg)))
       },
-      fail: (err) => reject(err)
+      fail: (err) => {
+        const errMsg = err.errMsg || err.message || JSON.stringify(err)
+        reject(new Error(errMsg))
+      }
     })
   })
 
@@ -715,5 +718,8 @@ module.exports = {
   addPublishedGoods: submitGroupPost,
   addParticipation,
   ocrScreenshot,
-  uploadCoverImage
+  uploadCoverImage,
+  getConfig,
+  buildAuthHeaders,
+  requestJson
 }
